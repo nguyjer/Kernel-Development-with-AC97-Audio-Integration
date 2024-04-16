@@ -3,46 +3,58 @@
 
 #include <stdint.h>
 #include "debug.h"
+#include "machine.h"
 
-#define AC97_VENDOR_ID 0x8086  // Example vendor ID for Intel
-#define AC97_DEVICE_ID 0x2415  // Example device ID for AC97
-#define MAX_PCI_BUSES 256
-#define MAX_PCI_SLOTS 32
-#define MAX_PCI_FUNCS 8
+#define CONFIG_ADDRESS 0xCF8
+#define CONFIG_DATA    0xCFC
 
-uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
-void outl(uint16_t port, uint32_t value);
-uint32_t inl(uint16_t port);
+#define AC97_VENDOR_ID 0x8086  // Example: Intel's vendor ID
+#define AC97_DEVICE_ID 0x2415  // Example: AC97's device ID
 
-uint16_t pciCheckVendor(uint8_t bus, uint8_t slot) {
-    uint16_t vendor, device;
-    /* Try and read the first configuration register. */
-    vendor = pciConfigReadWord(bus, slot, 0, 0);
-    if (vendor != 0xFFFF) {
-        device = pciConfigReadWord(bus, slot, 0, 2);
-        if (vendor == AC97_VENDOR_ID && device == AC97_DEVICE_ID) {
-            // Found the AC97 device
-            return 1;
-        }
-    }
-    return 0;
+// // Function to write to a specified port
+// void outl(uint16_t port, uint32_t value) {
+//     asm volatile ("outl %0, %1" : : "a"(value), "Nd"(port));
+// }
+
+// // Function to read from a specified port
+// uint32_t inl(uint16_t port) {
+//     uint32_t value;
+//     asm volatile ("inl %1, %0" : "=a"(value) : "Nd"(port));
+//     return value;
+// }
+
+// Function to construct the address for PCI config space access
+uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset) {
+    return (uint32_t)((bus << 16) | (device << 11) | (func << 8) | (offset & 0xFC) | 0x80000000);
 }
 
-void scanForAC97() {
-    uint8_t bus, slot, func;
+// Function to read a word from the PCI config space
+uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
+    uint32_t address = pciConfigAddress(bus, slot, func, offset);
+    outl(CONFIG_ADDRESS, address);
+    uint32_t data = inl(CONFIG_DATA);
+    return (uint16_t)((data >> ((offset & 2) * 8)) & 0xFFFF);
+}
 
-    for (bus = 0; bus < MAX_PCI_BUSES; bus++) {
-        for (slot = 0; slot < MAX_PCI_SLOTS; slot++) {
-            for (func = 0; func < MAX_PCI_FUNCS; func++) {
-                if (pciCheckVendor(bus, slot) == 1) {
-                    Debug::printf("AC97 found at bus %d, slot %d, func %d\n", bus, slot, func);
-                    return; // Stop scanning after finding the first AC97 device
-                }
+void findAC97() {
+    uint8_t bus, device;
+    for (bus = 0; bus < 256; bus++) {
+        for (device = 0; device < 32; device++) {
+            uint16_t vendor_id = pciConfigReadWord(bus, device, 0, 0);
+            if (vendor_id == 0xFFFF) {
+                // No device present at this slot
+                continue;
+            }
+            uint16_t device_id = pciConfigReadWord(bus, device, 0, 2);
+            if (vendor_id == AC97_VENDOR_ID && device_id == AC97_DEVICE_ID) {
+                Debug::printf("AC97 sound card found at bus %d, device %d\n", bus, device);
+                return;
             }
         }
     }
-    Debug::printf("AC97 not found\n");
+    Debug::printf("AC97 sound card not found\n");
 }
+
 
 
 #endif
