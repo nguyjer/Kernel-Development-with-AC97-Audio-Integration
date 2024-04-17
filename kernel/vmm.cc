@@ -70,6 +70,7 @@ namespace gheith
 
         map(pd, kConfig.ioAPIC, kConfig.ioAPIC);
         map(pd, kConfig.localAPIC, kConfig.localAPIC);
+        // map(pd, kCOnfig.ACpic)
 
         return pd;
     }
@@ -185,4 +186,5 @@ extern "C" void vmm_pageFault(uintptr_t va_, uintptr_t *saveState)
     }
 
     current()->process->exit(current()->id);
+    stop();
 }
