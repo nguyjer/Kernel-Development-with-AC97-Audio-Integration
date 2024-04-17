@@ -1,0 +1,111 @@
+c[?7l[2J[0mSeaBIOS (version rel-1.13.0-48-gd9c812dda519-prebuilt.qemu.org)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8F240+07EEF240 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxx.
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+| What just happened? Why am I here?
+| Discovering my identity and features
+|     CPUID: AuthenticAMD
+|     has SSE3
+|     has MONITOR/MWAIT
+|     running on hypervisor
+| totalProcs 4
+| memSize 0x7fd0000 127MB
+| localAPIC fee00000
+| ioAPIC fec00000
+| heap range 0x100000 0x600000
+| switched to new UART
+| physical range 0x600000 0x7fd0000
+| pitInit freq 1000Hz
+| pitInit divider 59659
+| APIT running at 1000045233Hz
+| APIT counter=1000045 for 1000Hz
+| initialize 1
+| reset 1
+|      eip:0x8000
+| initialize 2
+| reset 2
+|      eip:0x8000
+| initialize 3
+| reset 3
+|      eip:0x8000
+| initializing TSS:ss0 for 2
+| 2 enabling interrupts, I'm scared
+| initializing TSS:ss0 for 1
+| 1 enabling interrupts, I'm scared
+| initializing TSS:ss0 for 3
+| initializing TSS:ss0 for 0
+| 3 enabling interrupts, I'm scared
+| 0 enabling interrupts, I'm scared
+AC97 sound card found at bus 0, device 4
+BAR 0 is an I/O space BAR at address 0xC000
+BAR 1 is an I/O space BAR at address 0xC400
+BAR 2 is a memory space BAR at address 0x0
+BAR 3 is a memory space BAR at address 0x0
+BAR 4 is a memory space BAR at address 0x0
+BAR 5 is a memory space BAR at address 0x0
+*** 1
+*** init
+*** fd = 3
+*** len = 43
+*** this is nice
+*** we can read and write
+*** close = 0
+*** fd = 3
+*** len = -1
+*** libc.c:27 read error, fd = 3
+*** fd = 100
+*** len = -1
+*** libc.c:27 read error, fd = 100
+*** open again 3
+*** seek 17
+*** in child
+AC97 sound card found at bus 0, device 4
+BAR 0 is an I/O space BAR at address 0xC000
+BAR 1 is an I/O space BAR at address 0xC400
+BAR 2 is a memory space BAR at address 0x0
+BAR 3 is a memory space BAR at address 0x0
+BAR 4 is a memory space BAR at address 0x0
+BAR 5 is a memory space BAR at address 0x0
+*** argc = 4
+*** argv[0]=shell
+*** argv[1]=a
+*** argv[2]=b
+*** argv[3]=c
+*** we can read and write
+*** back from wait 666
+*** Don't panic
+*** 
+*** 
+***                          oooo$$$$$$$$$$$$oooo
+***                       oo$$$$$$$$$$$$$$$$$$$$$$$$o
+***                    oo$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$o         o$   $$ o$
+***    o $ oo        o$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$o       $$ $$ $$o$
+*** oo $ $ "$      o$$$$$$$$$    $$$$$$$$$$$$$    $$$$$$$$$o       $$$o$$o$
+*** "$$$$$$o$     o$$$$$$$$$      $$$$$$$$$$$      $$$$$$$$$$o    $$$$$$$$
+***   $$$$$$$    $$$$$$$$$$$      $$$$$$$$$$$      $$$$$$$$$$$$$$$$$$$$$$$
+***   $$$$$$$$$$$$$$$$$$$$$$$    $$$$$$$$$$$$$    $$$$$$$$$$$$$$  """$$$
+***    "$$$""""$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$     "$$$
+***     $$$   o$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$     "$$$o
+***    o$$"   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$       $$$o
+***    $$$    $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" "$$$$$$ooooo$$$$o
+***   o$$$oooo$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$   o$$$$$$$$$$$$$$$$$
+***   $$$$$$$$"$$$$   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$     $$$$""""""""
+***  """"       $$$$    "$$$$$$$$$$$$$$$$$$$$$$$$$$$$"      o$$$
+***             "$$$o     """$$$$$$$$$$$$$$$$$$"$$"         $$$
+***               $$$o          "$$""$$$$$$""""           o$$$
+***                $$$$o                                o$$$"
+***                 "$$$$o      o$$$$$$o"$$$$o        o$$$$
+***                   "$$$$$oo     ""$$$$o$$$$$o   o$$$$""
+***                      ""$$$$$oooo  "$$$o$$$$$$$$$"""
+***                         ""$$$$$$$oo $$$$$$$$$$
+***                                 """"$$$$$$$$$$$
+***                                     $$$$$$$$$$$$
+***                                      $$$$$$$$$$"
+***                                       "$$$""  
+*** 
+core 1 requested shutdown

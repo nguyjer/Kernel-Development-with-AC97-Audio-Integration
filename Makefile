@@ -49,7 +49,7 @@ QEMU_FLAGS = -no-reboot \
              -drive file=kernel/build/kernel.img,index=0,media=disk,format=raw \
              -drive file=$*.data,index=1,media=disk,format=raw \
 	     -device isa-debug-exit,iobase=0xf4,iosize=0x04 \
-		 -soundhw ac97
+		 -device ac97
 
 TIME = $(shell which time)
 
