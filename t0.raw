@@ -5,7 +5,8 @@ iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8F240+07EEF240 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
+xxxxxxxxx
 | What just happened? Why am I here?
 | Discovering my identity and features
 |     CPUID: AuthenticAMD
@@ -21,33 +22,57 @@ Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | physical range 0x600000 0x7fd0000
 | pitInit freq 1000Hz
 | pitInit divider 59659
-| APIT running at 1000043944Hz
-| APIT counter=1000043 for 1000Hz
+| APIT running at 1000055033Hz
+| APIT counter=1000055 for 1000Hz
 | initialize 1
 | reset 1
 |      eip:0x8000
 | initialize 2
 | reset 2
 |      eip:0x8000
-| initializing TSS:ss0 for 1
-| 1 enabling interrupts, I'm scared
-| initializing TSS:ss0 for 2
 | initialize 3
-| 2 enabling interrupts, I'm scared
+AC97 sound card found at bus 0, device 4
 | reset 3
 |      eip:0x8000
-| initializing TSS:ss0 for 3
-| 3 enabling interrupts, I'm scared
-| initializing TSS:ss0 for 0
-| 0 enabling interrupts, I'm scared
 AC97 sound card found at bus 0, device 4
 Enabled PCI register
-BAR 0 is an I/O space BAR at address 0xC000
-BAR 1 is an I/O space BAR at address 0xC400
+Enabled PCI register
+AC97 sound card found at bus 0, device 1
+BAR 0 is a memory space BAR at address 0x11111234
+Enabled PCI register
+BAR 1 is a memory space BAR at address 0x0
 BAR 2 is a memory space BAR at address 0x0
 BAR 3 is a memory space BAR at address 0x0
 BAR 4 is a memory space BAR at address 0x0
 BAR 5 is a memory space BAR at address 0x0
+BAR 0 is a memory space BAR at address 0x24158084
+AC97 sound card found at bus 0, device 4
+| initializing TSS:ss0 for 1
+BAR 1 is an I/O space BAR at address 0xC400
+Enabled PCI register
+BAR 0 is an I/O space BAR at address 0xC000
+BAR 2 is a memory space BAR at address 0x0
+BAR 1 is an I/O space BAR at address 0xC400
+BAR 0 is a memory space BAR at address 0x0
+BAR 1 is a memory space BAR at address 0x0
+BAR 2 is a memory space BAR at address 0x0
+BAR 3 is a memory space BAR at address 0x0
+BAR 4 is a memory space BAR at address 0x0
+BAR 5 is a memory space BAR at address 0x0
+| 1 enabling interrupts, I'm scared
+BAR 2 is a memory space BAR at address 0x0
+BAR 3 is a memory space BAR at address 0x0
+BAR 3 is a memory space BAR at address 0x0
+BAR 4 is a memory space BAR at address 0x0
+BAR 5 is a memory space BAR at address 0x0
+BAR 4 is a memory space BAR at address 0x0
+| initializing TSS:ss0 for 2
+| initializing TSS:ss0 for 3
+| 3 enabling interrupts, I'm scared
+| 2 enabling interrupts, I'm scared
+BAR 5 is a memory space BAR at address 0x0
+| initializing TSS:ss0 for 0
+| 0 enabling interrupts, I'm scared
 *** 1
 *** init
 *** fd = 3
@@ -64,14 +89,6 @@ BAR 5 is a memory space BAR at address 0x0
 *** open again 3
 *** seek 17
 *** in child
-AC97 sound card found at bus 0, device 4
-Enabled PCI register
-BAR 0 is an I/O space BAR at address 0xC000
-BAR 1 is an I/O space BAR at address 0xC400
-BAR 2 is a memory space BAR at address 0x0
-BAR 3 is a memory space BAR at address 0x0
-BAR 4 is a memory space BAR at address 0x0
-BAR 5 is a memory space BAR at address 0x0
 *** argc = 4
 *** argv[0]=shell
 *** argv[1]=a
@@ -109,4 +126,4 @@ BAR 5 is a memory space BAR at address 0x0
 ***                                      $$$$$$$$$$"
 ***                                       "$$$""  
 *** 
-core 1 requested shutdown
+core 2 requested shutdown

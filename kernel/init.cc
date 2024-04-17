@@ -17,6 +17,7 @@
 #include "tss.h"
 #include "sys.h"
 #include "process.h"
+#include "pci.h"
 
 struct Stack {
     static constexpr int BYTES = 4096;
@@ -119,7 +120,10 @@ extern "C" void kernelInit(void) {
         /* initialize LAPIC */
         SMP::init(true);
         smpInitDone = true;
-  
+
+        /* initialize AC97 Device */
+        PCI::findAC97();
+
         /* initialize IDT */
         IDT::init();
         Pit::calibrate(1000);

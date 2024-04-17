@@ -13,7 +13,7 @@
 #include "shared.h"
 #include "kernel.h"
 #include "openfilestruct.h"
-#include "pci.h"
+
 
 int strlen(const char *string)
 {
@@ -32,7 +32,6 @@ int SYS::exec(const char *path,
               const char *argv[])
 {
     using namespace gheith;
-    findAC97();
     //Debug::printf("In exec. path = %s\n", path);
     auto file = root_fs->find(root_fs->root, path);
     //Debug::printf("In exec. File = %x\n", file);
@@ -258,7 +257,6 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
                             { activeThreads[SMP::me()]->process->wait(id, status); });
         return *status;
     }
-
     case 9:
     {
         /* execl */
