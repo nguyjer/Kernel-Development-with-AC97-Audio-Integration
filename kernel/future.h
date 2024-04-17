@@ -25,7 +25,7 @@ public:
     Future& operator=(Future&& rhs) = delete;
     
     void set(T v) {
-        ASSERT(!isReady)
+        ASSERT(!isReady);
         if (isReady) {
             return;
         }

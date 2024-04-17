@@ -5,8 +5,7 @@ iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8F240+07EEF240 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxx.
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | What just happened? Why am I here?
 | Discovering my identity and features
 |     CPUID: AuthenticAMD
@@ -22,26 +21,27 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | physical range 0x600000 0x7fd0000
 | pitInit freq 1000Hz
 | pitInit divider 59659
-| APIT running at 1000045233Hz
-| APIT counter=1000045 for 1000Hz
+| APIT running at 1000043944Hz
+| APIT counter=1000043 for 1000Hz
 | initialize 1
 | reset 1
 |      eip:0x8000
 | initialize 2
 | reset 2
 |      eip:0x8000
-| initialize 3
-| reset 3
-|      eip:0x8000
-| initializing TSS:ss0 for 2
-| 2 enabling interrupts, I'm scared
 | initializing TSS:ss0 for 1
 | 1 enabling interrupts, I'm scared
+| initializing TSS:ss0 for 2
+| initialize 3
+| 2 enabling interrupts, I'm scared
+| reset 3
+|      eip:0x8000
 | initializing TSS:ss0 for 3
-| initializing TSS:ss0 for 0
 | 3 enabling interrupts, I'm scared
+| initializing TSS:ss0 for 0
 | 0 enabling interrupts, I'm scared
 AC97 sound card found at bus 0, device 4
+Enabled PCI register
 BAR 0 is an I/O space BAR at address 0xC000
 BAR 1 is an I/O space BAR at address 0xC400
 BAR 2 is a memory space BAR at address 0x0
@@ -65,6 +65,7 @@ BAR 5 is a memory space BAR at address 0x0
 *** seek 17
 *** in child
 AC97 sound card found at bus 0, device 4
+Enabled PCI register
 BAR 0 is an I/O space BAR at address 0xC000
 BAR 1 is an I/O space BAR at address 0xC400
 BAR 2 is a memory space BAR at address 0x0
