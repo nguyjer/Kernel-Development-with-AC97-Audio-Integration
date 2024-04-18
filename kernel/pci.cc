@@ -7,6 +7,39 @@
 #define AC97_VENDOR_ID 0x8086 // Example: Intel's vendor ID
 #define AC97_DEVICE_ID 0x2415 // Example: AC97's device ID
 
+namespace AC97
+{
+    constexpr uint16_t AC97_RESET_REG = 0x00;
+    constexpr uint16_t AC97_MASTER_VOL_REG = 0x02;
+    constexpr uint16_t AC97_AUX_VOL_REG = 0x04;
+    constexpr uint16_t AC97_PCM_OUT_VOL_REG = 0x18;
+    constexpr uint16_t AC97_EXTENDED_AUDIO_REG = 0x28;
+    constexpr uint16_t AC97_PCM_DAC_RATE_REG = 0x2C;
+    constexpr uint16_t AC97_NABM_IO_GLOBAL_CONTROL = 0x2C;
+
+    // Initialize AC97 codec and set up basic operation
+    void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
+    {
+        // Reset the codec by writing to the reset register using outl for 32-bit value simulation
+        outl(nam_base + AC97_RESET_REG, 0x00000001); // Simulate 32-bit write with 32-bit output
+
+        // Set volume levels
+        outb(nam_base + AC97_MASTER_VOL_REG, 0x00);     // Low byte for max volume
+        outb(nam_base + AC97_MASTER_VOL_REG + 1, 0x00); // High byte for max volume
+
+        // Set up global control without using outd
+        outl(nabm_base + AC97_NABM_IO_GLOBAL_CONTROL, (1 << 1)); // Assume 32-bit handling via outl
+
+        Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", nam_base, nabm_base);
+    }
+
+    void playAudio(uint32_t base_io_address, const uint8_t *audioData, size_t dataSize)
+    {
+        // Example of handling audio playback setup
+        Debug::printf("Preparing to play audio...\n");
+    }
+}
+
 namespace PCI
 {
     // Function to construct the address for PCI config space access
@@ -64,29 +97,18 @@ namespace PCI
                 uint16_t vendor_id = pciConfigReadWord(bus, device, 0, 0);
                 if (vendor_id == 0xFFFF)
                 {
-                    continue; // No device present at this slot
+                    continue;
                 }
                 uint16_t device_id = pciConfigReadWord(bus, device, 0, 2);
+
                 if (vendor_id == AC97_VENDOR_ID && device_id == AC97_DEVICE_ID)
                 {
-                    Debug::printf("AC97 sound card found at bus %d, device %d\n", bus, device);
                     enablePCICommandRegister(bus, device, 0);
-                    // Read BARs
-                    for (int bar_num = 0; bar_num < 6; bar_num++)
-                    {
-                        uint32_t bar = pciConfigReadDWord(bus, device, 0, 0x10 + bar_num * 4);
-                        bool is_io = bar & 1;          // Check if it's I/O space (bit 0 is 1)
-                        uint32_t address = bar & ~0x3; // Mask out the type bits
-
-                        if (is_io)
-                        {
-                            Debug::printf("BAR %d is an I/O space BAR at address 0x%X\n", bar_num, address);
-                        }
-                        else
-                        {
-                            Debug::printf("BAR %d is a memory space BAR at address 0x%X\n", bar_num, address);
-                        }
-                    }
+                    uint32_t nam_base = pciConfigReadDWord(bus, device, 0, 0x10);
+                    uint32_t nabm_base = pciConfigReadDWord(bus, device, 0, 0x14);
+                    nam_base &= ~0x3;
+                    nabm_base &= ~0x3;
+                    AC97::initializeCodec(nam_base, nabm_base);
                     return;
                 }
             }

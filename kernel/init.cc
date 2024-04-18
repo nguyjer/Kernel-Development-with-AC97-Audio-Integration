@@ -123,7 +123,7 @@ extern "C" void kernelInit(void) {
 
         /* initialize AC97 Device */
         PCI::findAC97();
-
+        
         /* initialize IDT */
         IDT::init();
         Pit::calibrate(1000);
