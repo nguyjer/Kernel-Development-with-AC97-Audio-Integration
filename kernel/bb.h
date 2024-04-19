@@ -5,7 +5,8 @@
 #include "atomic.h"
 
 template <typename T>
-class BoundedBuffer {
+class BoundedBuffer
+{
     uint32_t head;
     uint32_t n;
     Semaphore nEmpty;
@@ -13,16 +14,19 @@ class BoundedBuffer {
     Semaphore lock;
     const uint32_t N;
     T *data;
+
 public:
     Atomic<uint32_t> ref_count;
     BoundedBuffer(uint32_t N) : head(0), n(0), nEmpty(N), nFull(0), lock(1), N(N), data(new T[N]), ref_count(0) {}
-    ~BoundedBuffer() {
-        delete []data;
+    ~BoundedBuffer()
+    {
+        delete[] data;
     }
 
-    BoundedBuffer(const BoundedBuffer&) = delete;
+    BoundedBuffer(const BoundedBuffer &) = delete;
 
-    void put(T t) {
+    void put(T t)
+    {
         nEmpty.down();
         lock.down();
         data[(head + n) % N] = t;
@@ -31,7 +35,8 @@ public:
         nFull.up();
     }
 
-    T get() {
+    T get()
+    {
         T out;
         nFull.down();
         lock.down();
@@ -42,23 +47,27 @@ public:
         nEmpty.up();
         return out;
     }
-        
 };
 
-namespace gheith {
+namespace gheith
+{
 
     template <typename Out, typename Work>
-    struct StreamImpl : public TCBWithStack {
+    struct StreamImpl : public TCBWithStack
+    {
         Work work;
         Shared<BoundedBuffer<Out>> buffer;
-    
-        StreamImpl(uint32_t N, Work work) : TCBWithStack(), work(work), buffer(Shared<BoundedBuffer<Out>>::make(N)) {
+
+        StreamImpl(uint32_t N, Work work) : TCBWithStack(), work(work), buffer(Shared<BoundedBuffer<Out>>::make(N))
+        {
         }
 
-        ~StreamImpl() {
+        ~StreamImpl()
+        {
         }
 
-        void doYourThing() override {
+        void doYourThing() override
+        {
             work(buffer);
         }
     };
@@ -66,16 +75,16 @@ namespace gheith {
 }
 
 template <typename Out, typename Work>
-Shared<BoundedBuffer<Out>> stream(uint32_t N, Work work) {
+Shared<BoundedBuffer<Out>> stream(uint32_t N, Work work)
+{
     using namespace gheith;
 
     delete_zombies();
 
-    auto tcb = new StreamImpl<Out,Work>(N,work);
+    auto tcb = new StreamImpl<Out, Work>(N, work);
     auto b = tcb->buffer;
     schedule(tcb);
     return b;
-
 }
 
 #endif
