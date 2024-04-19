@@ -356,7 +356,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             //Debug::printf("bruh %x, %x\n", kConfig.ioAPIC, kConfig.localAPIC);
             // need to check if this buffer is in correct range
             size_t nbytes = (size_t)userEsp[3];
-            auto file = activeThreads[SMP::me()]->process->getFile(fd);
+            auto file = current()->process->getFile(fd);
             if (file == nullptr)
             {
                 return -1;

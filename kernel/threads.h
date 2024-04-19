@@ -17,7 +17,6 @@ namespace gheith {
 
     constexpr static int STACK_BYTES = 8 * 1024;
     constexpr static int STACK_WORDS = STACK_BYTES / sizeof(uint32_t);
-    constexpr static int NBUFFERS = 10;
 
     struct TCB;
 
@@ -45,7 +44,6 @@ namespace gheith {
         SaveArea saveArea;
 
         Shared<Process> process;
-        AC97::BufferDescriptor audio_buffers[NBUFFERS];
 
         TCB(Shared<Process> process, bool isIdle);
 

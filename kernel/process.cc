@@ -12,6 +12,8 @@ constexpr static uint32_t FL = 0x00000000;
 constexpr static uint32_t PROC = 0x10000000;
 constexpr static uint32_t SEM = 0x20000000;
 constexpr static uint32_t INDEX_MASK = 0x0FFFFFFF;
+constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
+constexpr uint32_t NUM_BUFFERS = 10;
 
 Shared<Process> Process::kernelProcess = Shared<Process>::make(true);
 
@@ -31,6 +33,21 @@ Process::Process(bool isInit) {
 Process::~Process() {
 	gheith::delete_pd(pd);
 
+}
+
+void Process::setupDMABuffers(uint32_t nabm_base)
+{
+	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
+	{
+		audio_buffers[i]->pointer = (uint32_t)malloc(BUFFER_SIZE);
+		audio_buffers[i]->length = BUFFER_SIZE;
+		audio_buffers[i]->control = 0; // Set appropriate control flags based on hardware spec
+	}
+
+	// Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
+	outl(nabm_base + 0x00, (uint32_t)audio_buffers); // Set the base address for Buffer Descriptor List
+	outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);						// set number of descriptor entries
+	Debug::printf("DMA buffers setup completed.\n");
 }
 
 int Process::newSemaphore(uint32_t init) {

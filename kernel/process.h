@@ -17,13 +17,13 @@ class Process
     constexpr static int NSEM = 10;
     constexpr static int NCHILD = 10;
     constexpr static int NFILE = 10;
-
+    constexpr static int NBUFFERS = 10;
 
     Shared<File> files[NFILE]{};
     Shared<Semaphore> sems[NSEM]{};
     Shared<Future<uint32_t>> children[NCHILD]{};
     BlockingLock mutex{};
-
+    AC97::BufferDescriptor * audio_buffers[NBUFFERS]{};
 
     int getChildIndex(int id);
     int getSemaphoreIndex(int id);
@@ -41,6 +41,8 @@ public:
 
     Shared<Process> fork(int &id);
     void clear_private();
+
+    void setupDMABuffers(uint32_t nabm_base);
 
     int newSemaphore(uint32_t init);
 
