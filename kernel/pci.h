@@ -11,4 +11,12 @@ namespace PCI
     void findAC97();
 }
 
+namespace AC97 {
+    struct BufferDescriptor {
+        uint32_t pointer;  // Physical address of the buffer
+        uint32_t length;   // Length of the buffer in samples
+        uint32_t control;  // Control flags
+    };
+}
+
 #endif // PCI_H

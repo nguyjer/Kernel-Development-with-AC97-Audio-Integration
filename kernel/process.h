@@ -10,17 +10,20 @@
 #include "file.h"
 #include "u8250.h"
 #include "shared.h"
+#include "pci.h"
 
 class Process
 {
     constexpr static int NSEM = 10;
     constexpr static int NCHILD = 10;
     constexpr static int NFILE = 10;
+    constexpr static int NBUFFERS = 10;
 
     Shared<File> files[NFILE]{};
     Shared<Semaphore> sems[NSEM]{};
     Shared<Future<uint32_t>> children[NCHILD]{};
     BlockingLock mutex{};
+    AC97::BufferDescriptor audio_buffers[NBUFFERS];
 
     int getChildIndex(int id);
     int getSemaphoreIndex(int id);
@@ -71,8 +74,7 @@ public:
     void exit(uint32_t v)
     {
         output->set(v);
-        
-    }
+        }
     int wait(int id, uint32_t *ptr);
 
     static void init(void);

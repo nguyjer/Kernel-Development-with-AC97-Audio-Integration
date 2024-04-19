@@ -21,12 +21,6 @@ namespace AC97
     constexpr uint32_t BUFFER_SIZE = 65536;  // 64 KB per buffer
     constexpr uint32_t NUM_BUFFERS = 4;      // Total of 4 buffers
 
-    struct BufferDescriptor {
-        uint32_t pointer;  // Physical address of the buffer
-        uint32_t length;   // Length of the buffer in samples
-        uint32_t control;  // Control flags
-    };
-
     // Global buffer descriptors array
     BufferDescriptor bufferDescriptors[NUM_BUFFERS];
 
@@ -40,11 +34,11 @@ namespace AC97
         // Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
         outl(nabm_base + 0x00, (uint32_t)&bufferDescriptors);  // Set the base address for Buffer Descriptor List
         outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS); //set number of descriptor entries
-
+        current()->audio_buffers = &bufferDescriptors;
         Debug::printf("DMA buffers setup completed.\n");
     }
 
-    
+
 
     // Initialize AC97 codec and set up basic operation
     void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
@@ -140,6 +134,7 @@ namespace PCI
                     nam_base &= ~0x3;
                     nabm_base &= ~0x3;
                     AC97::initializeCodec(nam_base, nabm_base);
+                    AC97::setupDMABuffers(nabm_base);
                     return;
                 }
             }
