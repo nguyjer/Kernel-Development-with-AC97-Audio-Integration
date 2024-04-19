@@ -14,7 +14,6 @@
 #include "kernel.h"
 #include "openfilestruct.h"
 
-
 int strlen(const char *string)
 {
     int strlen = 0;
@@ -32,9 +31,9 @@ int SYS::exec(const char *path,
               const char *argv[])
 {
     using namespace gheith;
-    //Debug::printf("In exec. path = %s\n", path);
+    // Debug::printf("In exec. path = %s\n", path);
     auto file = root_fs->find(root_fs->root, path);
-    //Debug::printf("In exec. File = %x\n", file);
+    // Debug::printf("In exec. File = %x\n", file);
     if (file == nullptr)
     {
         return -1;
@@ -45,23 +44,27 @@ int SYS::exec(const char *path,
     }
     ElfHeader hdr;
 
-    file->read(0,hdr);
-    //Debug::printf("Can we read this file?\n");
-    if (hdr.magic0 != 0x7F || hdr.magic1 != 'E' || hdr.magic2 != 'L' || hdr.magic3 != 'F') {
-        return -1; //not a valid ELF file
+    file->read(0, hdr);
+    // Debug::printf("Can we read this file?\n");
+    if (hdr.magic0 != 0x7F || hdr.magic1 != 'E' || hdr.magic2 != 'L' || hdr.magic3 != 'F')
+    {
+        return -1; // not a valid ELF file
     }
-    if (hdr.encoding != 1 || hdr.cls != 1 || hdr.abi != 0 || hdr.header_version != 1) { //Little-endian 32-bit Unix
+    if (hdr.encoding != 1 || hdr.cls != 1 || hdr.abi != 0 || hdr.header_version != 1)
+    { // Little-endian 32-bit Unix
         return -1;
     }
-    if (hdr.version != 1 || hdr.type != 2) { //valid ELF version, executable
+    if (hdr.version != 1 || hdr.type != 2)
+    { // valid ELF version, executable
         return -1;
     }
-    if (hdr.phoff == 0) {
+    if (hdr.phoff == 0)
+    {
         return -1;
     }
-    //Debug::printf("%d, %c, %c, %c\n", hdr.magic0, hdr.magic1, hdr.magic2, hdr.magic3);
-    //Debug::printf("EXEC path = %s\n", path);
-    //Debug::printf("EXEC argc = %d", argc);
+    // Debug::printf("%d, %c, %c, %c\n", hdr.magic0, hdr.magic1, hdr.magic2, hdr.magic3);
+    // Debug::printf("EXEC path = %s\n", path);
+    // Debug::printf("EXEC argc = %d", argc);
     for (int i = 0; i < argc; i++)
     {
         // //Debug::printf("argv[%d] = %s\n", i, argv[i]);
@@ -171,11 +174,11 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     {
         int fd = (int)userEsp[1];
         char *buf = (char *)userEsp[2];
-        
+
         size_t nbyte = (size_t)userEsp[3];
-        if ((uint32_t) buf < 0x80000000 || (uint32_t) buf == kConfig.ioAPIC || (uint32_t) buf == kConfig.localAPIC)
+        if ((uint32_t)buf < 0x80000000 || (uint32_t)buf == kConfig.ioAPIC || (uint32_t)buf == kConfig.localAPIC)
         {
-            //Debug::printf("Passing in kernel pointer in wait.\n");
+            // Debug::printf("Passing in kernel pointer in wait.\n");
             return -1;
         }
         auto file = current()->process->getFile(fd);
@@ -249,7 +252,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         uint32_t *status = (uint32_t *)userEsp[2];
         if (status < (uint32_t *)0x80000000 || status == (uint32_t *)kConfig.ioAPIC || status == (uint32_t *)kConfig.localAPIC)
         {
-            //Debug::printf("Passing in kernel pointer in wait.\n");
+            // Debug::printf("Passing in kernel pointer in wait.\n");
             return -1;
         }
         Interrupts::protect([id, status]
@@ -264,22 +267,22 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         const char *path = (const char *)userEsp[1];
         if (path < (const char *)0x80000000 || path == (const char *)kConfig.ioAPIC || path == (const char *)kConfig.localAPIC)
         {
-            //Debug::printf("Passing in kernel pointer as path in execl.\n");
+            // Debug::printf("Passing in kernel pointer as path in execl.\n");
             return -1;
         }
         // check is path is a valid address and if argv is valid address
-        //Debug::printf("my path is %s\n", path);
-        //Debug::printf("userEsp[2] = %x\n", userEsp[1]);
-        //Debug::printf("userEsp[2] = %x\n", userEsp[2]);
-        //Debug::printf("userEsp[2] = %x\n", userEsp[3]);
-        //Debug::printf("userEsp[2] = %x\n", userEsp[4]);
+        // Debug::printf("my path is %s\n", path);
+        // Debug::printf("userEsp[2] = %x\n", userEsp[1]);
+        // Debug::printf("userEsp[2] = %x\n", userEsp[2]);
+        // Debug::printf("userEsp[2] = %x\n", userEsp[3]);
+        // Debug::printf("userEsp[2] = %x\n", userEsp[4]);
         const char *argv[100]; // arbitrarily assume no more than 100 args
         int argc = 0;
         while (userEsp[argc + 2] != 0 && argc < 99)
         {
             if (userEsp[argc + 2] < 0x80000000 || userEsp[argc + 2] == kConfig.ioAPIC || userEsp[argc + 2] == kConfig.localAPIC)
             {
-                //Debug::printf("Passing in kernel pointer as argv[%d] in execl.\n", argc);
+                // Debug::printf("Passing in kernel pointer as argv[%d] in execl.\n", argc);
                 return -1;
             }
             argv[argc] = (char *)userEsp[argc + 2];
@@ -292,7 +295,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         }
         // //Debug::printf("L - argc is %d\n", argc);
         argv[argc] = nullptr; // Terminate the argv array
-        //Debug::printf("Calling exec from -L\n");
+        // Debug::printf("Calling exec from -L\n");
         SYS::exec(path, argc, argv);
         return -1;
     }
@@ -311,16 +314,17 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         {
             return -1;
         }
-        //Debug::printf("JACOB's print: %d %d %d\n", node->is_symlink(), node->is_file(), node->is_dir());
-        while (node->is_symlink()) {
-            char* filename_buffer = new char[node->size_in_bytes() + 1];
+        // Debug::printf("JACOB's print: %d %d %d\n", node->is_symlink(), node->is_file(), node->is_dir());
+        while (node->is_symlink())
+        {
+            char *filename_buffer = new char[node->size_in_bytes() + 1];
             node->get_symbol(filename_buffer);
             filename_buffer[node->size_in_bytes()] = '\0';
-            //Debug::printf("Symbolic link = %s\n", filename_buffer);
+            // Debug::printf("Symbolic link = %s\n", filename_buffer);
             node = root_fs->find(root_fs->root, filename_buffer);
             delete filename_buffer;
         }
-        if (node == nullptr) //check one more time for dangling symbolic link
+        if (node == nullptr) // check one more time for dangling symbolic link
         {
             return -1;
         }
@@ -350,17 +354,19 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             void *buf = (void *)userEsp[2];
             if (buf < (void *)0x80000000 || (uint32_t)buf == kConfig.ioAPIC || (uint32_t)buf == kConfig.localAPIC)
             {
-                //Debug::printf("Invalid read at %x\n", buf);
+                // Debug::printf("Invalid read at %x\n", buf);
                 return -1;
             }
-            //Debug::printf("bruh %x, %x\n", kConfig.ioAPIC, kConfig.localAPIC);
-            // need to check if this buffer is in correct range
+            // Debug::printf("bruh %x, %x\n", kConfig.ioAPIC, kConfig.localAPIC);
+            //  need to check if this buffer is in correct range
             size_t nbytes = (size_t)userEsp[3];
             auto file = activeThreads[SMP::me()]->process->getFile(fd);
             if (file == nullptr)
             {
                 return -1;
-            } else if (file->isU8250()) {
+            }
+            else if (file->isU8250())
+            {
                 return -1;
             }
             return file->read(buf, nbytes);
@@ -374,14 +380,35 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         if (file == nullptr)
         {
             return -1;
-        } else if (file->isU8250()) {
+        }
+        else if (file->isU8250())
+        {
             return -1;
         }
         return file->seek(offset);
     }
+    case 14: /*play_audio*/
+    {
+        int fd = (int)userEsp[1];
+        auto file = gheith::current()->process->getFile(fd);
+        if (file == nullptr)
+        {
+            return -1;
+        }
+        else if (file->isU8250())
+        {
+            return -1;
+        } //else if it is a valid audio file
+        BufferDescriptor bdl[NBUFFERS] = gheith::current()->process->audio_buffers;
+        gheith::current()->process->fill_buffers();
+        AC97::play();
+        //set the play bit to 1
+        
+
+    }
 
     default:
-        //Debug::printf("*** 1000000000 unknown system call %d\n", eax);
+        // Debug::printf("*** 1000000000 unknown system call %d\n", eax);
         return -1;
     }
     return 0;
