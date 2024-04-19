@@ -399,8 +399,8 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         {
             return -1;
         } //else if it is a valid audio file
-        BufferDescriptor bdl[NBUFFERS] = gheith::current()->process->audio_buffers;
-        gheith::current()->process->fill_buffers();
+        current()->process->setupDMABuffers();
+        current()->process->fill_buffers();
         AC97::play();
         //set the play bit to 1
         

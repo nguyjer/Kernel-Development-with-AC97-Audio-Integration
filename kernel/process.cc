@@ -37,17 +37,21 @@ Process::~Process() {
 
 void Process::setupDMABuffers(uint32_t nabm_base)
 {
+	if (setupBuffers) {
+		return;
+	}
 	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
 	{
-		audio_buffers[i]->pointer = (uint32_t)malloc(BUFFER_SIZE);
-		audio_buffers[i]->length = BUFFER_SIZE;
-		audio_buffers[i]->control = 0; // Set appropriate control flags based on hardware spec
+		audio_buffers[i].pointer = (uint32_t)malloc(BUFFER_SIZE);
+		audio_buffers[i].length = BUFFER_SIZE;
+		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
 	}
 
 	// Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
 	outl(nabm_base + 0x00, (uint32_t)audio_buffers); // Set the base address for Buffer Descriptor List
-	outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);						// set number of descriptor entries
+	outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);	// set number of descriptor entries
 	Debug::printf("DMA buffers setup completed.\n");
+	setupBuffers = true;
 }
 
 int Process::newSemaphore(uint32_t init) {

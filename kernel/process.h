@@ -23,7 +23,8 @@ class Process
     Shared<Semaphore> sems[NSEM]{};
     Shared<Future<uint32_t>> children[NCHILD]{};
     BlockingLock mutex{};
-    AC97::BufferDescriptor * audio_buffers[NBUFFERS]{};
+    AC97::BufferDescriptor audio_buffers[NBUFFERS]{};
+    bool setupBuffers = false;
 
     int getChildIndex(int id);
     int getSemaphoreIndex(int id);
@@ -43,6 +44,8 @@ public:
     void clear_private();
 
     void setupDMABuffers(uint32_t nabm_base);
+
+    void fillBuffers(uint32_t fd)
 
     int newSemaphore(uint32_t init);
 
