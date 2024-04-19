@@ -5,8 +5,7 @@ iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8F240+07EEF240 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk..xxxxxx.
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | What just happened? Why am I here?
 | Discovering my identity and features
 |     CPUID: AuthenticAMD
@@ -22,10 +21,11 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | physical range 0x600000 0x7fd0000
 Enabled PCI register
 AC97 codec initialized with NAM base I/O address 0xC000 and NABM base I/O address 0xC400
+DMA buffers setup completed.
 | pitInit freq 1000Hz
 | pitInit divider 59659
-| APIT running at 1000043423Hz
-| APIT counter=1000043 for 1000Hz
+| APIT running at 1000081554Hz
+| APIT counter=1000081 for 1000Hz
 | initialize 1
 | reset 1
 |      eip:0x8000
@@ -33,16 +33,16 @@ AC97 codec initialized with NAM base I/O address 0xC000 and NABM base I/O addres
 | reset 2
 |      eip:0x8000
 | initialize 3
-| initializing TSS:ss0 for 1
-| initializing TSS:ss0 for 2
-| 1 enabling interrupts, I'm scared
-| 2 enabling interrupts, I'm scared
 | reset 3
 |      eip:0x8000
+| initializing TSS:ss0 for 2
+| initializing TSS:ss0 for 1
+| 1 enabling interrupts, I'm scared
+| 2 enabling interrupts, I'm scared
 | initializing TSS:ss0 for 3
+| 3 enabling interrupts, I'm scared
 | initializing TSS:ss0 for 0
 | 0 enabling interrupts, I'm scared
-| 3 enabling interrupts, I'm scared
 *** 1
 *** init
 *** fd = 3
@@ -96,4 +96,4 @@ AC97 codec initialized with NAM base I/O address 0xC000 and NABM base I/O addres
 ***                                      $$$$$$$$$$"
 ***                                       "$$$""  
 *** 
-core 1 requested shutdown
+core 3 requested shutdown

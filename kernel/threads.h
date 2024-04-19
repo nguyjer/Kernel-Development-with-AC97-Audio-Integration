@@ -9,6 +9,7 @@
 #include "shared.h"
 #include "vmm.h"
 #include "tss.h"
+#include "pci.h"
 
 class Process;
 

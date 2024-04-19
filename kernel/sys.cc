@@ -85,8 +85,7 @@ int SYS::exec(const char *path,
     }
 
     // Clear the address space
-    Interrupts::protect([]
-                        { delete_private(activeThreads[SMP::me()]->process->pd); });
+    current()->process->clear_private();
 
     // copy all the actual chars from the buffer into the very top of the stack
     uint32_t *addresses = new uint32_t[argc]; // contains start addresses of each argv

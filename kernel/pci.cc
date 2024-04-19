@@ -25,7 +25,7 @@ namespace AC97
 
     void setupDMABuffers(uint32_t nabm_base)
     {
-        for (int i = 0; i < NUM_BUFFERS; i++)
+        for (uint32_t i = 0; i < NUM_BUFFERS; i++)
         {
             gheith::current()->audio_buffers[i].pointer = (uint32_t)malloc(BUFFER_SIZE);
             gheith::current()->audio_buffers[i].length = BUFFER_SIZE;
