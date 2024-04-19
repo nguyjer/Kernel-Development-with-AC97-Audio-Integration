@@ -155,7 +155,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     uint32_t *userEsp = (uint32_t *)frame[3];
     uint32_t userPC = frame[0];
 
-    // ////Debug::printf("*** syscall #%d\n", eax);
+    //Debug::printf("*** syscall #%d\n", eax);
 
     switch (eax)
     {
@@ -378,6 +378,10 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             return -1;
         }
         return file->seek(offset);
+    }
+    case 14:
+    {
+        current()->process->setupDMABuffers();
     }
 
     default:
