@@ -2,12 +2,12 @@
 #include "debug.h"
 #include "machine.h"
 #include "bb.h"
+#include "threads.h"
 
 #define CONFIG_ADDRESS 0xCF8
 #define CONFIG_DATA 0xCFC
 #define AC97_VENDOR_ID 0x8086 // Example: Intel's vendor ID
 #define AC97_DEVICE_ID 0x2415 // Example: AC97's device ID
-
 
 namespace AC97
 {
@@ -18,27 +18,25 @@ namespace AC97
     constexpr uint16_t AC97_EXTENDED_AUDIO_REG = 0x28;
     constexpr uint16_t AC97_PCM_DAC_RATE_REG = 0x2C;
     constexpr uint16_t AC97_NABM_IO_GLOBAL_CONTROL = 0x2C;
-    constexpr uint32_t BUFFER_SIZE = 65536;  // 64 KB per buffer
-    constexpr uint32_t NUM_BUFFERS = 4;      // Total of 4 buffers
+    constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
+    constexpr uint32_t NUM_BUFFERS = 10;
 
-    // Global buffer descriptors array
-    BufferDescriptor bufferDescriptors[NUM_BUFFERS];
 
-    void setupDMABuffers(uint32_t nabm_base) {
-        for (int i = 0; i < NUM_BUFFERS; i++) {
-            bufferDescriptors[i].pointer = (uint32_t)malloc(BUFFER_SIZE);
-            bufferDescriptors[i].length = BUFFER_SIZE;
-            bufferDescriptors[i].control = 0;  // Set appropriate control flags based on hardware spec
+
+    void setupDMABuffers(uint32_t nabm_base)
+    {
+        for (int i = 0; i < NUM_BUFFERS; i++)
+        {
+            gheith::current()->audio_buffers[i].pointer = (uint32_t)malloc(BUFFER_SIZE);
+            gheith::current()->audio_buffers[i].length = BUFFER_SIZE;
+            gheith::current()->audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
         }
 
         // Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
-        outl(nabm_base + 0x00, (uint32_t)&bufferDescriptors);  // Set the base address for Buffer Descriptor List
-        outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS); //set number of descriptor entries
-        current()->audio_buffers = &bufferDescriptors;
+        outl(nabm_base + 0x00, (uint32_t)gheith::current()->audio_buffers); // Set the base address for Buffer Descriptor List
+        outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);         // set number of descriptor entries
         Debug::printf("DMA buffers setup completed.\n");
     }
-
-
 
     // Initialize AC97 codec and set up basic operation
     void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
