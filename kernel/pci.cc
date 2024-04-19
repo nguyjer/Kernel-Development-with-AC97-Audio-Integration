@@ -3,6 +3,7 @@
 #include "machine.h"
 #include "bb.h"
 #include "threads.h"
+#include "process.h"
 
 #define CONFIG_ADDRESS 0xCF8
 #define CONFIG_DATA 0xCFC
@@ -23,20 +24,6 @@ namespace AC97
 
 
 
-    void setupDMABuffers(uint32_t nabm_base)
-    {
-        for (uint32_t i = 0; i < NUM_BUFFERS; i++)
-        {
-            gheith::current()->audio_buffers[i].pointer = (uint32_t)malloc(BUFFER_SIZE);
-            gheith::current()->audio_buffers[i].length = BUFFER_SIZE;
-            gheith::current()->audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
-        }
-
-        // Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
-        outl(nabm_base + 0x00, (uint32_t)gheith::current()->audio_buffers); // Set the base address for Buffer Descriptor List
-        outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);         // set number of descriptor entries
-        Debug::printf("DMA buffers setup completed.\n");
-    }
 
     // Initialize AC97 codec and set up basic operation
     void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
@@ -132,7 +119,7 @@ namespace PCI
                     nam_base &= ~0x3;
                     nabm_base &= ~0x3;
                     AC97::initializeCodec(nam_base, nabm_base);
-                    AC97::setupDMABuffers(nabm_base);
+                    // gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
                 }
             }
