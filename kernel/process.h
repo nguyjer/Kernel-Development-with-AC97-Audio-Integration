@@ -17,7 +17,7 @@ class Process
     constexpr static int NSEM = 10;
     constexpr static int NCHILD = 10;
     constexpr static int NFILE = 10;
-    constexpr static int NBUFFERS = 10;
+    constexpr static int NBUFFERS = 20;
 
     Shared<File> files[NFILE]{};
     Shared<Semaphore> sems[NSEM]{};
@@ -45,7 +45,7 @@ public:
 
     void setupDMABuffers(uint32_t nabm_base);
 
-    void fillBuffers(uint32_t fd)
+    void fillBuffers(Shared<File> file);
 
     int newSemaphore(uint32_t init);
 
@@ -80,8 +80,9 @@ public:
     int close(int id);
     void exit(uint32_t v)
     {
+        
         output->set(v);
-        }
+    }
     int wait(int id, uint32_t *ptr);
 
     static void init(void);

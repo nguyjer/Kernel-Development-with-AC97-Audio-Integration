@@ -3,12 +3,13 @@
 #define PCI_H
 
 #include <stdint.h>
+#include "machine.h"
 
 // Function declarations
 namespace PCI
 {
-    uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
-    void findAC97();
+    extern uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+    extern void findAC97();
 }
 
 namespace AC97 {
@@ -17,6 +18,10 @@ namespace AC97 {
         uint32_t length;   // Length of the buffer in samples
         uint32_t control;  // Control flags
     };
+    extern uint32_t nam_register;
+    extern uint32_t nabm_register;
+
+    extern void play();
 }
 
 #endif // PCI_H

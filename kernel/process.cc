@@ -13,7 +13,7 @@ constexpr static uint32_t PROC = 0x10000000;
 constexpr static uint32_t SEM = 0x20000000;
 constexpr static uint32_t INDEX_MASK = 0x0FFFFFFF;
 constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
-constexpr uint32_t NUM_BUFFERS = 10;
+constexpr uint32_t NUM_BUFFERS = 20;
 
 Shared<Process> Process::kernelProcess = Shared<Process>::make(true);
 
@@ -52,6 +52,15 @@ void Process::setupDMABuffers(uint32_t nabm_base)
 	outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);	// set number of descriptor entries
 	Debug::printf("DMA buffers setup completed.\n");
 	setupBuffers = true;
+}
+
+void Process::fillBuffers(Shared<File> file) {
+	int len = file->size();
+	int num_buffers = (len + BUFFER_SIZE) / BUFFER_SIZE; // rounded down len
+	for (int i = 0; i < num_buffers - 1; i++) {
+		file->read(&audio_buffers[i], BUFFER_SIZE);
+	}
+	file->read(&audio_buffers[num_buffers - 1], len % BUFFER_SIZE);
 }
 
 int Process::newSemaphore(uint32_t init) {

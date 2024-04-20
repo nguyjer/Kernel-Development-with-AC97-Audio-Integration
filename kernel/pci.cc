@@ -22,7 +22,8 @@ namespace AC97
     constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
     constexpr uint32_t NUM_BUFFERS = 10;
 
-
+    uint32_t nam_register;
+    uint32_t nabm_register;
 
 
     // Initialize AC97 codec and set up basic operation
@@ -43,10 +44,8 @@ namespace AC97
         Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", nam_base, nabm_base);
     }
 
-    void playAudio(uint32_t base_io_address, const uint8_t *audioData, size_t dataSize)
-    {
-        // Example of handling audio playback setup
-        Debug::printf("Preparing to play audio...\n");
+    void play(){
+        outb(nabm_register + 0x0B, 1);
     }
 }
 
@@ -118,6 +117,8 @@ namespace PCI
                     uint32_t nabm_base = pciConfigReadDWord(bus, device, 0, 0x14);
                     nam_base &= ~0x3;
                     nabm_base &= ~0x3;
+                    AC97::nam_register = nam_base;
+                    AC97::nabm_register = nabm_base;
                     AC97::initializeCodec(nam_base, nabm_base);
                     // gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
