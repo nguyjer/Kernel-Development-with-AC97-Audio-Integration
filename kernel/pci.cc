@@ -5,6 +5,8 @@
 #include "threads.h"
 #include "process.h"
 
+//Some of the code is from ChatGPT, some is adapted from OSDev
+
 #define CONFIG_ADDRESS 0xCF8
 #define CONFIG_DATA 0xCFC
 #define AC97_VENDOR_ID 0x8086 // Example: Intel's vendor ID
