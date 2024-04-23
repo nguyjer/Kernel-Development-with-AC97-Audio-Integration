@@ -22,8 +22,9 @@ namespace AC97
     };
     extern uint32_t nam_register;
     extern uint32_t nabm_register;
-
+    extern bool audioPlaying;
     extern void play();
+    extern bool isPlaying();
 }
 
 #endif // PCI_H

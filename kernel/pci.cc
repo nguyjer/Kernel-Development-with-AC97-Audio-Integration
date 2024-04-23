@@ -27,6 +27,7 @@ namespace AC97
 
     uint32_t nam_register;
     uint32_t nabm_register;
+    bool audioPlaying = false;
 
     // Initialize AC97 codec and set up basic operation
     void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
@@ -57,14 +58,24 @@ namespace AC97
     {
         outb(nabm_register + 0x0B, 1);
         Debug::printf("Started playing audio.\n");
-        
-        uint32_t target = Pit::seconds() + 3000; //target is 30 seconds
-        while (Pit::seconds() < target) {
+        audioPlaying = true;
+        uint32_t target = Pit::seconds() + 30; // target is 30 seconds
+        sti();
+        while (Pit::seconds() < target)
+        {
             //busy wait
-            Debug::printf("Seconds = %d\n", Pit::seconds());
+            
+            gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
+                          { gheith::schedule(me); });
+            // Debug::printf("Seconds = %d\n", Pit::seconds());
             iAmStuckInALoop(true);
         }
+        audioPlaying = false;
         Debug::printf("Finished playing audio.\n");
+    }
+
+    bool isPlaying() {
+        return audioPlaying;
     }
 }
 
