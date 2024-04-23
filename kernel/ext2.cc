@@ -137,34 +137,47 @@ void Node::get_symbol(char* buffer) {
     }
 }
 
-void Node::read_block(uint32_t index, char* buffer) {
+void Node::read_block(uint32_t index, char *buffer)
+{
     ASSERT(index < data.n_sectors / (block_size / 512));
 
     auto refs_per_block = block_size / 4;
 
     uint32_t block_index;
 
-    if (index < 12) {
-        uint32_t* direct = &data.direct0;
+    if (index < 12)
+    {
+        uint32_t *direct = &data.direct0;
         block_index = direct[index];
-    } else if (index < (12 + refs_per_block)) {
-        ide->read(data.indirect_1 * block_size + (index - 12) * 4,block_index);
+    }
+    else if (index < (12 + refs_per_block))
+    {
+        index = index - 12;
+        ide->read(data.indirect_1 * block_size + (index) * 4, block_index);
     }
     else if (index < (12 + refs_per_block + (refs_per_block * refs_per_block)))
     {
-        ide->read(data.indirect_2 * block_size + (index - 12 - refs_per_block) * 4 , block_index);
+        uint32_t singly_block;
+        index = (index - 12 - refs_per_block);
+        ide->read(data.indirect_2 * block_size + (index / refs_per_block) * 4, singly_block);
+        ide->read(singly_block * block_size + (index % refs_per_block) * 4, block_index);
     }
-    else if (index < (12 + refs_per_block + (refs_per_block * refs_per_block) + (refs_per_block * refs_per_block * refs_per_block)))
+    else if (index < (12 + refs_per_block + (refs_per_block * refs_per_block)))
     {
-        ide->read(data.indirect_3 * block_size + (index - 12 - refs_per_block - (refs_per_block * refs_per_block)) * 4, block_index);
+        uint32_t doubly_block;
+        uint32_t singly_block;
+        index = index - 12 - refs_per_block - (refs_per_block * refs_per_block);
+        ide->read(data.indirect_3 * block_size + (index / (refs_per_block * refs_per_block)) * 4, doubly_block);
+        ide->read(doubly_block * block_size + ((index / refs_per_block) % refs_per_block) * 4, singly_block);
+        ide->read(singly_block * block_size + (index % refs_per_block), block_index);
     }
     else
     {
         block_index = 0;
-        Debug::panic("index = %d\n",index);
+        Debug::panic("index = %d\n", index);
     }
 
-    auto cnt = ide->read_all(block_index * block_size, block_size,buffer);
+    auto cnt = ide->read_all(block_index * block_size, block_size, buffer);
     ASSERT(cnt == block_size);
 }
 

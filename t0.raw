@@ -5,8 +5,7 @@ iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8F240+07EEF240 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxx.
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Booting from Hard Disk..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | What just happened? Why am I here?
 | Discovering my identity and features
 |     CPUID: AuthenticAMD
@@ -25,22 +24,22 @@ AC97 codec initialized with NAM base I/O address 0xC000 and NABM base I/O addres
 DMA buffers setup completed.
 | pitInit freq 1000Hz
 | pitInit divider 59659
-| APIT running at 1000042272Hz
-| APIT counter=1000042 for 1000Hz
+| APIT running at 1000047205Hz
+| APIT counter=1000047 for 1000Hz
 | initialize 1
 | reset 1
 |      eip:0x8000
 | initialize 2
 | reset 2
 |      eip:0x8000
+| initializing TSS:ss0 for 1
 | initialize 3
+| initializing TSS:ss0 for 2
 | reset 3
 |      eip:0x8000
-| initializing TSS:ss0 for 2
-| initializing TSS:ss0 for 1
 | 1 enabling interrupts, I'm scared
-| 2 enabling interrupts, I'm scared
 | initializing TSS:ss0 for 3
+| 2 enabling interrupts, I'm scared
 | 3 enabling interrupts, I'm scared
 | initializing TSS:ss0 for 0
 | 0 enabling interrupts, I'm scared
@@ -74,4 +73,12 @@ Reading Data buffer... i = 10
 Print audio buffer 2f4c80
 Reading Data buffer... i = 11
 Print audio buffer 304c88
-drive error, device:1, status:41| processor 1 halting
+Reading Data buffer... i = 12
+Print audio buffer 314c90
+Reading Data buffer... i = 13
+Print audio buffer 324c98
+Reading Data buffer... i = 14
+Print audio buffer 334ca0
+Reading Data buffer... i = 15
+Finished Reading Data Buffer...
+Buffers filled!!
