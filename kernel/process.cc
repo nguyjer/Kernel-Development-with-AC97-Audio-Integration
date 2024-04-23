@@ -42,7 +42,8 @@ void Process::setupDMABuffers(uint32_t nabm_base)
 	}
 	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
 	{
-		audio_buffers[i].pointer = (uint32_t)malloc(BUFFER_SIZE);
+		audio_buffers[i] = *(new AC97::BufferDescriptor);
+		audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
 		audio_buffers[i].length = BUFFER_SIZE;
 		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
 	}
@@ -55,12 +56,32 @@ void Process::setupDMABuffers(uint32_t nabm_base)
 }
 
 void Process::fillBuffers(Shared<File> file) {
-	int len = file->size();
+	Debug::printf("Filling buffers...\n");
+	int len = file->size() - 44;
 	int num_buffers = (len + BUFFER_SIZE) / BUFFER_SIZE; // rounded down len
-	for (int i = 0; i < num_buffers - 1; i++) {
-		file->read(&audio_buffers[i], BUFFER_SIZE);
+	char *hdrbuffer = new char[44];
+	Debug::printf("Creating hdr buffer...\n");
+	// skip .wav file header
+	file->read(hdrbuffer, sizeof(WAVHeader));
+	Debug::printf("Reading hdr buffer...\n");
+	WAVHeader *wavhdr = (WAVHeader *)hdrbuffer;
+	//check file header
+	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E') {
+		Debug::printf("*** Trying to play a non-WAV audio file.\n");
+		return;
 	}
-	file->read(&audio_buffers[num_buffers - 1], len % BUFFER_SIZE);
+	Debug::printf("Starting audio buffers... num = %d\n", num_buffers);
+
+	for (int i = 0; i < num_buffers - 1; i++)
+	{
+		Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
+		file->read((char *)audio_buffers[i].pointer, BUFFER_SIZE);
+		Debug::printf("Reading Data buffer... i = %d\n", i);
+	}
+	Debug::printf("Finished Reading Data Buffer...\n");
+
+	file->read((char *)audio_buffers[num_buffers - 1].pointer, len % BUFFER_SIZE);
+	Debug::printf("Buffers filled!!\n");
 }
 
 int Process::newSemaphore(uint32_t init) {

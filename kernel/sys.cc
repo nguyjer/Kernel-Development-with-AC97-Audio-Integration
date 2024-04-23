@@ -14,6 +14,7 @@
 #include "kernel.h"
 #include "openfilestruct.h"
 #include "pci.h"
+#include "pit.h"
 
 int strlen(const char *string)
 {
@@ -402,10 +403,8 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         } //else if it is a valid audio file
         current()->process->setupDMABuffers(AC97::nabm_register);
         current()->process->fillBuffers(file);
-        AC97::play();
         //set the play bit to 1
-        
-
+        AC97::play();
     }
 
     default:

@@ -149,15 +149,14 @@ void Node::read_block(uint32_t index, char* buffer) {
         block_index = direct[index];
     } else if (index < (12 + refs_per_block)) {
         ide->read(data.indirect_1 * block_size + (index - 12) * 4,block_index);
-    
     }
-    else if (index < (12 + refs_per_block + refs_per_block))
+    else if (index < (12 + refs_per_block + (refs_per_block * refs_per_block)))
     {
-        ide->read(data.indirect_2 * block_size + (index - 12) * 4 , block_index);
+        ide->read(data.indirect_2 * block_size + (index - 12 - refs_per_block) * 4 , block_index);
     }
-    else if (index < (12 + refs_per_block + refs_per_block + refs_per_block))
+    else if (index < (12 + refs_per_block + (refs_per_block * refs_per_block) + (refs_per_block * refs_per_block * refs_per_block)))
     {
-        ide->read(data.indirect_3 * block_size + (index - 12) * 4, block_index);
+        ide->read(data.indirect_3 * block_size + (index - 12 - refs_per_block - (refs_per_block * refs_per_block)) * 4, block_index);
     }
     else
     {

@@ -78,4 +78,6 @@ extern int fork();
 /* a nullptr indicates end of arguments */
 extern int execl(const char* path, const char* arg0, ...);
 
+extern void play_audio(int fd);
+
 #endif

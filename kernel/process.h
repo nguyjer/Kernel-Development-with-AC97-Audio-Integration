@@ -11,6 +11,25 @@
 #include "u8250.h"
 #include "shared.h"
 #include "pci.h"
+struct WAVHeader
+{
+    uint32_t riff;
+    uint32_t file_size;
+    unsigned char magic0;
+    unsigned char magic1;
+    char magic2;
+    unsigned char magic3;
+    uint32_t fmt;
+    uint32_t fmt_length;
+    uint16_t format_type;
+    uint16_t num_channels;
+    uint32_t sample_rate;
+    uint32_t sample_rate_eq;
+    uint16_t garb;
+    uint16_t bitsPerSample;
+    uint32_t start_of_data;
+    uint32_t data_size;
+};
 
 class Process
 {
@@ -51,8 +70,6 @@ public:
 
     Shared<Semaphore> getSemaphore(int id);
 
-    
-
     Shared<File> getFile(int fd)
     {
         auto i = getFileIndex(fd);
@@ -80,7 +97,7 @@ public:
     int close(int id);
     void exit(uint32_t v)
     {
-        
+
         output->set(v);
     }
     int wait(int id, uint32_t *ptr);

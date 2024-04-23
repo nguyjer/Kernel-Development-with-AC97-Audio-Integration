@@ -4,8 +4,9 @@
 #include "bb.h"
 #include "threads.h"
 #include "process.h"
+#include "pit.h"
 
-//Some of the code is from ChatGPT, some is adapted from OSDev
+// Some of the code is from ChatGPT, some is adapted from OSDev
 
 #define CONFIG_ADDRESS 0xCF8
 #define CONFIG_DATA 0xCFC
@@ -27,7 +28,6 @@ namespace AC97
     uint32_t nam_register;
     uint32_t nabm_register;
 
-
     // Initialize AC97 codec and set up basic operation
     void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
     {
@@ -40,14 +40,29 @@ namespace AC97
         // outb(nam_base + AC97_AUX_VOL_REG, 0x00);     // Low byte for max volume
         // outb(nam_base + AC97_AUX_VOL_REG + 1, 0x00); // High byte for max volume
 
+        // Convert 22000 to bytes and write them separately
+        uint16_t rate = 22000; // Sample rate in Hz for 22kHz
+        // Set low byte of sample rate
+        outb(nam_base + 0x2C, (uint8_t)(rate & 0xFF));
+        // Set high byte of sample rate
+        outb(nam_base + 0x2C + 1, (uint8_t)(rate >> 8));
+
         // Set up global control without using outd
         outl(nabm_base + AC97_NABM_IO_GLOBAL_CONTROL, (1 << 1)); // Assume 32-bit handling via outl
 
         Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", nam_base, nabm_base);
     }
 
-    void play(){
+    void play()
+    {
         outb(nabm_register + 0x0B, 1);
+        int currJiffies = Pit::jiffies;
+        int target = currJiffies + 30000; //target is 30 seconds
+        while (currJiffies < target) {
+            //busy wait
+            currJiffies = Pit::jiffies;
+            iAmStuckInALoop(true);
+        }
     }
 }
 
@@ -122,7 +137,7 @@ namespace PCI
                     AC97::nam_register = nam_base;
                     AC97::nabm_register = nabm_base;
                     AC97::initializeCodec(nam_base, nabm_base);
-                    // gheith::current()->process->setupDMABuffers(nabm_base);
+                    gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
                 }
             }

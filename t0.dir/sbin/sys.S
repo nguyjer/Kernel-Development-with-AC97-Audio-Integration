@@ -112,3 +112,10 @@ seek:
 	mov $13,%eax
 	int $48
 	ret
+
+	#void play_audio(int fd)
+	.global play_audio
+play_audio:
+	mov $14,%eax
+	int $48
+	ret
