@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     
     int fd = open("data/audiofile.wav", 0);
     play_audio(fd);
-
+    printf("Exited sys call.\n");
     
     shutdown();
     return 0;

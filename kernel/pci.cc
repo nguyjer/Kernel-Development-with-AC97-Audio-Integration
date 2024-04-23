@@ -56,13 +56,16 @@ namespace AC97
     void play()
     {
         outb(nabm_register + 0x0B, 1);
+        Debug::printf("Started playing audio.\n");
         int currJiffies = Pit::jiffies;
         int target = currJiffies + 30000; //target is 30 seconds
         while (currJiffies < target) {
             //busy wait
+            Debug::printf("Jiffies = %d\n", currJiffies);
             currJiffies = Pit::jiffies;
-            iAmStuckInALoop(true);
+            //iAmStuckInALoop(true);
         }
+        Debug::printf("Finished playing audio.\n");
     }
 }
 
@@ -115,11 +118,13 @@ namespace PCI
 
     void findAC97()
     {
-        uint8_t bus, device;
+        uint16_t bus = 0;
+        uint8_t device = 0;
         for (bus = 0; bus < 256; bus++)
         {
             for (device = 0; device < 32; device++)
             {
+                Debug::printf("Testing bus %d device %d\n", bus, device);
                 uint16_t vendor_id = pciConfigReadWord(bus, device, 0, 0);
                 if (vendor_id == 0xFFFF)
                 {
@@ -129,6 +134,7 @@ namespace PCI
 
                 if (vendor_id == AC97_VENDOR_ID && device_id == AC97_DEVICE_ID)
                 {
+                    Debug::printf("Found AC97.\n");
                     enablePCICommandRegister(bus, device, 0);
                     uint32_t nam_base = pciConfigReadDWord(bus, device, 0, 0x10);
                     uint32_t nabm_base = pciConfigReadDWord(bus, device, 0, 0x14);
@@ -137,7 +143,7 @@ namespace PCI
                     AC97::nam_register = nam_base;
                     AC97::nabm_register = nabm_base;
                     AC97::initializeCodec(nam_base, nabm_base);
-                    gheith::current()->process->setupDMABuffers(nabm_base);
+                    //gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
                 }
             }

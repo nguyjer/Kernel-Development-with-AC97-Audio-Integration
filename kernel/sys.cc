@@ -391,6 +391,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     }
     case 14: /*play_audio*/
     {
+        Debug::printf("Inside play_audio sys call.\n");
         int fd = (int)userEsp[1];
         auto file = gheith::current()->process->getFile(fd);
         if (file == nullptr)
