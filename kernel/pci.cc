@@ -61,9 +61,9 @@ namespace AC97
         int target = currJiffies + 30000; //target is 30 seconds
         while (currJiffies < target) {
             //busy wait
-            Debug::printf("Jiffies = %d\n", currJiffies);
+            // Debug::printf("Jiffies = %d\n", currJiffies);
             currJiffies = Pit::jiffies;
-            //iAmStuckInALoop(true);
+            iAmStuckInALoop(true);
         }
         Debug::printf("Finished playing audio.\n");
     }
@@ -124,14 +124,19 @@ namespace PCI
         {
             for (device = 0; device < 32; device++)
             {
-                Debug::printf("Testing bus %d device %d\n", bus, device);
+                // Debug::printf("Testing bus %d device %d\n", bus, device);
                 uint16_t vendor_id = pciConfigReadWord(bus, device, 0, 0);
+                uint16_t device_id = pciConfigReadWord(bus, device, 0, 2);
+                // if (bus == 0 && device == 4)
+                // {
+                    // Debug::printf("Suppose to be AC97 vendor_id = %d device_id = %d\n", vendor_id, device_id);
+                // }
                 if (vendor_id == 0xFFFF)
                 {
                     continue;
                 }
-                uint16_t device_id = pciConfigReadWord(bus, device, 0, 2);
-
+                
+                
                 if (vendor_id == AC97_VENDOR_ID && device_id == AC97_DEVICE_ID)
                 {
                     Debug::printf("Found AC97.\n");

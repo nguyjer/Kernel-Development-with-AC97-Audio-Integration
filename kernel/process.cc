@@ -60,10 +60,10 @@ void Process::fillBuffers(Shared<File> file) {
 	int len = file->size() - 44;
 	int num_buffers = (len + BUFFER_SIZE) / BUFFER_SIZE; // rounded down len
 	char *hdrbuffer = new char[44];
-	Debug::printf("Creating hdr buffer...\n");
+	// Debug::printf("Creating hdr buffer...\n");
 	// skip .wav file header
 	file->read(hdrbuffer, sizeof(WAVHeader));
-	Debug::printf("Reading hdr buffer...\n");
+	// Debug::printf("Reading hdr buffer...\n");
 	WAVHeader *wavhdr = (WAVHeader *)hdrbuffer;
 	//check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E') {
@@ -74,9 +74,9 @@ void Process::fillBuffers(Shared<File> file) {
 
 	for (int i = 0; i < num_buffers - 1; i++)
 	{
-		Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
+		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
 		file->read((char *)audio_buffers[i].pointer, BUFFER_SIZE);
-		Debug::printf("Reading Data buffer... i = %d\n", i);
+		// Debug::printf("Reading Data buffer... i = %d\n", i);
 	}
 	Debug::printf("Finished Reading Data Buffer...\n");
 
