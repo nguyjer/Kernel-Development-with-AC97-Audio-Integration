@@ -57,12 +57,11 @@ namespace AC97
     {
         outb(nabm_register + 0x0B, 1);
         Debug::printf("Started playing audio.\n");
-        int currJiffies = Pit::jiffies;
-        int target = currJiffies + 30000; //target is 30 seconds
-        while (currJiffies < target) {
+        
+        uint32_t target = Pit::seconds() + 3000; //target is 30 seconds
+        while (Pit::seconds() < target) {
             //busy wait
-            // Debug::printf("Jiffies = %d\n", currJiffies);
-            currJiffies = Pit::jiffies;
+            Debug::printf("Seconds = %d\n", Pit::seconds());
             iAmStuckInALoop(true);
         }
         Debug::printf("Finished playing audio.\n");
