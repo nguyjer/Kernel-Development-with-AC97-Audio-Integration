@@ -118,9 +118,9 @@ namespace PCI
 
     void findAC97()
     {
-        uint16_t bus = 0;
+        uint8_t bus = 0;
         uint8_t device = 0;
-        for (bus = 0; bus < 256; bus++)
+        for (bus = 0; bus < 255; bus++)
         {
             for (device = 0; device < 32; device++)
             {
