@@ -12,7 +12,7 @@ constexpr static uint32_t FL = 0x00000000;
 constexpr static uint32_t PROC = 0x10000000;
 constexpr static uint32_t SEM = 0x20000000;
 constexpr static uint32_t INDEX_MASK = 0x0FFFFFFF;
-constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
+constexpr uint16_t BUFFER_SIZE = 65535; // 64 KB per buffer
 constexpr uint32_t NUM_BUFFERS = 20;
 
 Shared<Process> Process::kernelProcess = Shared<Process>::make(true);

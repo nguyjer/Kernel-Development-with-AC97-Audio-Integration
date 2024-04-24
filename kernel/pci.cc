@@ -60,7 +60,7 @@ namespace AC97
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;
         uint32_t target = Pit::jiffies + Pit::secondsToJiffies(30); // target is 30 seconds
-        sti();
+        // sti();
         // Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
         while (Pit::jiffies < target)
         {

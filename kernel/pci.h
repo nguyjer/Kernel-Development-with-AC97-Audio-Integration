@@ -17,8 +17,8 @@ namespace AC97
     struct BufferDescriptor
     {
         uint32_t pointer; // Physical address of the buffer
-        uint32_t length;  // Length of the buffer in samples
-        uint32_t control; // Control flags
+        uint16_t length;  // Length of the buffer in samples
+        uint16_t control; // Control flags
     };
     extern uint32_t nam_register;
     extern uint32_t nabm_register;

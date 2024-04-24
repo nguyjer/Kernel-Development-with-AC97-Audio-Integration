@@ -125,7 +125,8 @@ extern "C" void kernelInit(void) {
         IDT::init();
         
         Pit::calibrate(1000);
-
+        /* initialize AC97 Device */
+        PCI::findAC97();
         SMP::running.fetch_add(1);
 
         // The reset EIP has to be
@@ -150,8 +151,6 @@ extern "C" void kernelInit(void) {
     // Initialize the PIT
     Pit::init();
 
-    /* initialize AC97 Device */
-    PCI::findAC97();
 
     auto id = SMP::me();
 
