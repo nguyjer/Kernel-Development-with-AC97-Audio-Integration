@@ -54,12 +54,12 @@ namespace AC97
         Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", nam_base, nabm_base);
     }
 
-    void play()
+    void play(uint32_t duration)
     {
         outb(nabm_register + 0x0B, 1);
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;
-        uint32_t target = Pit::jiffies + Pit::secondsToJiffies(30); // target is 30 seconds
+        uint32_t target = Pit::jiffies + Pit::secondsToJiffies(duration); // target is 30 seconds
         // sti();
         // Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
         while (Pit::jiffies < target)

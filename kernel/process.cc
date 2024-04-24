@@ -55,24 +55,33 @@ void Process::setupDMABuffers(uint32_t nabm_base)
 	setupBuffers = true;
 }
 
-void Process::fillBuffers(Shared<File> file) {
+uint32_t swapEndian(uint32_t value)
+{
+	return ((value >> 24) & 0xFF) |
+		   ((value >> 8) & 0xFF00) |
+		   ((value << 8) & 0xFF0000) |
+		   ((value << 24) & 0xFF000000);
+}
+
+uint32_t Process::fillBuffers(Shared<File> file) {
 	Debug::printf("Filling buffers...\n");
-	int len = file->size() - 44;
-	int num_buffers = (len + BUFFER_SIZE) / BUFFER_SIZE; // rounded down len
-	char *hdrbuffer = new char[44];
+	// int len = file->size() - 44;
+	// int num_buffers = (len + BUFFER_SIZE) / BUFFER_SIZE; // rounded down len
+
 	// Debug::printf("Creating hdr buffer...\n");
 	// skip .wav file header
-	file->read(hdrbuffer, sizeof(WAVHeader));
+	WAVHeader *wavhdr = new WAVHeader[44];
+	file->read(wavhdr, sizeof(WAVHeader));
 	// Debug::printf("Reading hdr buffer...\n");
-	WAVHeader *wavhdr = (WAVHeader *)hdrbuffer;
-	//check file header
+	int num_buffers = (wavhdr->file_size - 44) / BUFFER_SIZE;
+	// check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E') {
 		Debug::printf("*** Trying to play a non-WAV audio file.\n");
-		return;
+		return -1;
 	}
 	Debug::printf("Starting audio buffers... num = %d\n", num_buffers);
 
-	for (int i = 0; i < num_buffers - 1; i++)
+	for (int i = 0; i < num_buffers; i++)
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
 		file->read((char *)audio_buffers[i].pointer, BUFFER_SIZE);
@@ -80,9 +89,17 @@ void Process::fillBuffers(Shared<File> file) {
 	}
 	Debug::printf("Finished Reading Data Buffer...\n");
 
-	file->read((char *)audio_buffers[num_buffers - 1].pointer, len % BUFFER_SIZE);
+	file->read((char *)audio_buffers[num_buffers].pointer, (wavhdr->file_size - 44) % BUFFER_SIZE);
 	Debug::printf("Buffers filled!!\n");
+	Debug::printf("file_size = %d\n", wavhdr->file_size);
+	Debug::printf("data_size = %d\n", wavhdr->data_size);
+	Debug::printf("sample_rate = %d\n", wavhdr->sample_rate);
+	Debug::printf("num channels = %d\n", wavhdr->num_channels);
+	Debug::printf("bitsPerSample = %d\n", wavhdr->bitsPerSample);
+
+	return (wavhdr->file_size - 44) / ((wavhdr->sample_rate * wavhdr->num_channels * wavhdr->bitsPerSample) / 8);
 }
+
 
 int Process::newSemaphore(uint32_t init) {
 	LockGuard<BlockingLock> lock { mutex };

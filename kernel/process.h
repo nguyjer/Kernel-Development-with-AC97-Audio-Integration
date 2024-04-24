@@ -13,13 +13,13 @@
 #include "pci.h"
 struct WAVHeader
 {
-    uint32_t riff;
+    unsigned char riff[4];
     uint32_t file_size;
     unsigned char magic0;
     unsigned char magic1;
-    char magic2;
+    unsigned char magic2;
     unsigned char magic3;
-    uint32_t fmt;
+    unsigned char fmt[4];
     uint32_t fmt_length;
     uint16_t format_type;
     uint16_t num_channels;
@@ -27,7 +27,7 @@ struct WAVHeader
     uint32_t sample_rate_eq;
     uint16_t garb;
     uint16_t bitsPerSample;
-    uint32_t start_of_data;
+    unsigned char start_of_data[4];
     uint32_t data_size;
 };
 
@@ -64,7 +64,7 @@ public:
 
     void setupDMABuffers(uint32_t nabm_base);
 
-    void fillBuffers(Shared<File> file);
+    uint32_t fillBuffers(Shared<File> file);
 
     int newSemaphore(uint32_t init);
 

@@ -108,6 +108,9 @@ extern "C" void kernelInit(void) {
         /* initialize VMM */
         VMM::global_init();
 
+        /* initialize AC97 Device */
+        PCI::findAC97();
+
         /* global constructors */
         CRT::init();
 
@@ -125,8 +128,7 @@ extern "C" void kernelInit(void) {
         IDT::init();
         
         Pit::calibrate(1000);
-        /* initialize AC97 Device */
-        PCI::findAC97();
+
         SMP::running.fetch_add(1);
 
         // The reset EIP has to be

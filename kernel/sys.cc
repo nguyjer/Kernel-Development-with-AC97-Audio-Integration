@@ -403,9 +403,13 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             return -1;
         } //else if it is a valid audio file
         current()->process->setupDMABuffers(AC97::nabm_register);
-        current()->process->fillBuffers(file);
+        uint32_t duration = current()->process->fillBuffers(file);
         //set the play bit to 1
-        AC97::play();
+        if (duration == (uint32_t)-1) {
+            return -1;
+        }
+        Debug::printf("duration = %d\n", duration);
+        AC97::play(duration);
         // gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
         //               { return !AC97::isPlaying(); });
         return 1;
