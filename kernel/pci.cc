@@ -59,15 +59,15 @@ namespace AC97
         outb(nabm_register + 0x0B, 1);
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;
-        uint32_t target = Pit::seconds() + 30; // target is 30 seconds
-        sti();
-        while (Pit::seconds() < target)
+        uint32_t target = Pit::jiffies + Pit::secondsToJiffies(30); // target is 30 seconds
+        // sti();
+        while (Pit::jiffies < target)
         {
             //busy wait
             
-            gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
-                          { gheith::schedule(me); });
-            // Debug::printf("Seconds = %d\n", Pit::seconds());
+            // gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
+            //               { gheith::schedule(me); });
+            Debug::printf("jiffies = %d\n", Pit::jiffies);
             iAmStuckInALoop(true);
         }
         audioPlaying = false;

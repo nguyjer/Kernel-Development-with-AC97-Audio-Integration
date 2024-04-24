@@ -406,8 +406,8 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         current()->process->fillBuffers(file);
         //set the play bit to 1
         AC97::play();
-        gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
-                      { return !AC97::isPlaying(); });
+        // gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
+        //               { return !AC97::isPlaying(); });
         return 1;
     }
 
