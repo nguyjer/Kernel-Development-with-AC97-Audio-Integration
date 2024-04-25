@@ -408,9 +408,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             return -1;
         }
         Debug::printf("duration = %d\n", duration);
-        outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
-	    outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
-	    outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
+        
         AC97::play(duration);
         // gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
         //               { return !AC97::isPlaying(); });

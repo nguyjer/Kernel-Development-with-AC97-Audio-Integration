@@ -84,7 +84,9 @@ void setupDMABuffers(uint32_t nabm_base)
     void play(uint32_t duration)
     {
         outl(BAR1 + 0x06, 0x1C);
-
+        outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
+        outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
+        outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
         outb(BAR1 + 0x0B, 0x1);
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;
