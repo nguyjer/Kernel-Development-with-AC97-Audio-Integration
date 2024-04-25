@@ -7,6 +7,8 @@ extern "C" void resetEIP(void);
 
 extern "C" int inb(int port);
 extern "C" int inl(int port);
+extern "C" int inw(int port);
+
 extern "C" void outb(int port, int val);
 extern "C" void outw(int port, int val);
 extern "C" void outl(int port, int val);

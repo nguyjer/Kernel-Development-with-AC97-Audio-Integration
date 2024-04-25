@@ -39,7 +39,15 @@ inb:
 	ret
 
 
-
+	# int inw(int port)
+	.global inw
+inw:
+	push %edx
+	mov 8(%esp),%dx
+	inw %dx,%ax
+	pop %edx
+	and $0xffff,%eax
+	ret
 
 	# unsigned long inl(int port)
 	.global inl

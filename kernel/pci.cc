@@ -84,6 +84,7 @@ void setupDMABuffers(uint32_t nabm_base)
     void play(uint32_t duration)
     {
         outl(BAR1 + 0x06, 0x1C);
+
         outb(BAR1 + 0x0B, 0x1);
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;
