@@ -402,7 +402,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         {
             return -1;
         } //else if it is a valid audio file
-        current()->process->setupDMABuffers(AC97::nabm_register);
+        current()->process->setupDMABuffers(AC97::BAR1);
         uint32_t duration = current()->process->fillBuffers(file);
         //set the play bit to 1
         if (duration == (uint32_t)-1) {

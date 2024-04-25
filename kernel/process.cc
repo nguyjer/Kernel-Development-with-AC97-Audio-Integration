@@ -70,7 +70,7 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 
 	// Debug::printf("Creating hdr buffer...\n");
 	// skip .wav file header
-	WAVHeader *wavhdr = new WAVHeader[44];
+	WAVHeader *wavhdr = new WAVHeader;
 	file->read(wavhdr, sizeof(WAVHeader));
 	// Debug::printf("Reading hdr buffer...\n");
 	int num_buffers = (wavhdr->file_size - 44) / BUFFER_SIZE;
@@ -85,7 +85,7 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
 		file->read((char *)audio_buffers[i].pointer, BUFFER_SIZE);
-		// Debug::printf("Reading Data buffer... i = %d\n", i);
+		Debug::printf("Reading Data buffer... i = %x\n", audio_buffers[i]);
 	}
 	Debug::printf("Finished Reading Data Buffer...\n");
 

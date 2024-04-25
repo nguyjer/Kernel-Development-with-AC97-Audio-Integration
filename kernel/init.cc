@@ -108,8 +108,7 @@ extern "C" void kernelInit(void) {
         /* initialize VMM */
         VMM::global_init();
 
-        /* initialize AC97 Device */
-        PCI::findAC97();
+        
 
         /* global constructors */
         CRT::init();
@@ -123,6 +122,9 @@ extern "C" void kernelInit(void) {
         /* initialize LAPIC */
         SMP::init(true);
         smpInitDone = true;
+        
+        /* initialize AC97 Device */
+        PCI::findAC97();
 
         /* initialize IDT */
         IDT::init();

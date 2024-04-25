@@ -20,8 +20,8 @@ namespace AC97
         uint16_t length;  // Length of the buffer in samples
         uint16_t control; // Control flags
     };
-    extern uint32_t nam_register;
-    extern uint32_t nabm_register;
+    extern uint32_t BAR0;
+    extern uint32_t BAR1;
     extern bool audioPlaying;
     extern void play(uint32_t duration);
     extern bool isPlaying();
