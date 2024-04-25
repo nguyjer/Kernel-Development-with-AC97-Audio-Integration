@@ -6,7 +6,7 @@
 #include "process.h"
 #include "pit.h"
 
-// Some of the code is from ChatGPT, some is adapted from OSDev
+// Some of the code is from ChatGPT, some is adapted from OSDev.
 
 #define CONFIG_ADDRESS 0xCF8
 #define CONFIG_DATA 0xCFC
@@ -27,38 +27,38 @@ namespace AC97
 
     uint32_t BAR0;
     uint32_t BAR1;
-
+    bool audioPlaying = false;
 
     // Initialize AC97 codec and set up basic operation
-    void initializeCodec(uint32_t BAR0, uint32_t BAR1)
-    {
-        // Reset the codec by writing to the reset register using outl for 32-bit value simulation
-        outl(BAR0 + AC97_RESET_REG, 0x00000001);
+    void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
+{
+    // Reset the codec by writing to the reset register using outl for 32-bit value simulation
+    outl(nam_base + AC97_RESET_REG, 0x00000001);
 
-        // // Set volume levels
-        // outb(nam_base + AC97_MASTER_VOL_REG, 0x00);     // Low byte for max volume
-        // outb(nam_base + AC97_MASTER_VOL_REG + 1, 0x00); // High byte for max volume
-        // outb(nam_base + AC97_AUX_VOL_REG, 0x00);     // Low byte for max volume
-        // outb(nam_base + AC97_AUX_VOL_REG + 1, 0x00); // High byte for max volume
+    // Set volume levels to maximum (0x0000 is maximum, 0x8000 is mute in AC97)
+    outw(nam_base + AC97_MASTER_VOL_REG, 0x0000); // Master volume to max
+    outw(nam_base + AC97_AUX_VOL_REG, 0x0000);    // AUX volume to max
+    outw(nam_base + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
 
-        // Convert 22000 to bytes and write them separately
-        uint16_t rate = 24000; // Sample rate in Hz for 22kHz
-        // Set low byte of sample rate
-        outb(BAR0 + 0x2C, (uint8_t)(rate & 0xFF));
-        // Set high byte of sample rate
-        outb(BAR0 + 0x2C + 1, (uint8_t)(rate >> 8));
+    // Set PCM sample rate to 44100 Hz (CD quality)
+    // Ensuring the rate is set for the entire word and not just a byte
+    outw(nam_base + AC97_PCM_DAC_RATE_REG, 44100);
 
-        // Set up global control without using outd
-        outl(BAR1 + AC97_NABM_IO_GLOBAL_CONTROL, (1 << 1)); // Assume 32-bit handling via outl
+    // Enable audio output
+    // Properly setting global control register, ensuring correct register (0x6C)
+    uint32_t gctrl = inl(nabm_base + AC97_NABM_IO_GLOBAL_CONTROL);
+    gctrl |= (1 << 1);  // Enable PCM output
+    outl(nabm_base + AC97_NABM_IO_GLOBAL_CONTROL, gctrl);
 
-        Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
-    }
+    Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", nam_base, nabm_base);
+}
+
 
     void play(uint32_t duration)
     {
-        outb(BAR1 + 0x0B, 255);
+        outb(BAR1 + 0x0B, 1);
         Debug::printf("Started playing audio.\n");
-
+        audioPlaying = true;
         uint32_t target = Pit::jiffies + Pit::secondsToJiffies(duration); // target is 30 seconds
         // sti();
         // Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
@@ -71,10 +71,13 @@ namespace AC97
             // Debug::printf("jiffies = %d\n", Pit::jiffies);
             iAmStuckInALoop(true);
         }
-
+        audioPlaying = false;
         Debug::printf("Finished playing audio.\n");
     }
 
+    bool isPlaying() {
+        return audioPlaying;
+    }
 }
 
 namespace PCI
@@ -149,13 +152,13 @@ namespace PCI
                 {
                     Debug::printf("Found AC97.\n");
                     enablePCICommandRegister(bus, device, 0);
-                    uint32_t BAR0 = pciConfigReadDWord(bus, device, 0, 0x10);
-                    uint32_t BAR1 = pciConfigReadDWord(bus, device, 0, 0x14);
-                    BAR0 &= ~0x3;
-                    BAR1 &= ~0x3;
-                    AC97::BAR0 = BAR0;
-                    AC97::BAR1 = BAR1;
-                    AC97::initializeCodec(BAR0, BAR1);
+                    uint32_t nam_base = pciConfigReadDWord(bus, device, 0, 0x10);
+                    uint32_t nabm_base = pciConfigReadDWord(bus, device, 0, 0x14);
+                    nam_base &= ~0x3;
+                    nabm_base &= ~0x3;
+                    AC97::BAR0 = nam_base;
+                    AC97::BAR1 = nabm_base;
+                    AC97::initializeCodec(nam_base, nabm_base);
                     //gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
                 }

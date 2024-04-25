@@ -8,6 +8,18 @@ outb:
 	pop %edx
 	ret
 
+    # outw(int port, int val)
+    .global outw
+outw:
+    push %edx
+    mov 8(%esp), %edx      # Load the port address from stack into %edx (use 32-bit register for compatibility)
+    mov 12(%esp), %eax     # Load the data value from stack into %eax (use 32-bit register for compatibility)
+    outw %ax, %dx          # Output the word value to the port using %ax (16-bit part of %eax) and %dx (16-bit part of %edx)
+    pop %edx
+    ret
+
+
+
 	# outl(int port, int val)
         .global outl
 outl:
@@ -25,6 +37,9 @@ inb:
 	pop %edx
 	and $0xff,%eax
 	ret
+
+
+
 
 	# unsigned long inl(int port)
 	.global inl
