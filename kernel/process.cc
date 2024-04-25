@@ -103,7 +103,8 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	file->read(wavhdr, sizeof(WAVHeader));
 	// Debug::printf("Reading hdr buffer...\n");
 	// wavhdr->data_size = swapEndian(wavhdr->data_size);
-	int num_buffers = (wavhdr->file_size - 44) / BUFFER_SIZE;
+	// int num_buffers = (wavhdr->file_size - 44) / BUFFER_SIZE;
+	int num_buffers = 31;
 	// check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E') {
 		Debug::printf("*** Trying to play a non-WAV audio file.\n");
