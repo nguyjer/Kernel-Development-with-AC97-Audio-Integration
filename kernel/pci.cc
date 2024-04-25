@@ -12,6 +12,9 @@
 #define CONFIG_DATA 0xCFC
 #define AC97_VENDOR_ID 0x8086 // Example: Intel's vendor ID
 #define AC97_DEVICE_ID 0x2415 // Example: AC97's device ID
+bool setupBuffers = false;
+
+
 
 namespace AC97
 {
@@ -28,8 +31,26 @@ namespace AC97
     uint32_t BAR0;
     uint32_t BAR1;
     uint32_t GCR;
-    bool audioPlaying = false;
+    BufferDescriptor* audio_buffers;
 
+    bool audioPlaying = false;
+void setupDMABuffers(uint32_t nabm_base)
+{
+	if (setupBuffers) {
+		return;
+	}
+	audio_buffers = new AC97::BufferDescriptor[NUM_BUFFERS];
+	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
+	{
+		audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
+		audio_buffers[i].length = 0xFFFE;
+		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
+	}
+
+	// Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
+	Debug::printf("DMA buffers setup completed.\n");
+	setupBuffers = true;
+}
     // Initialize AC97 codec and set up basic operation
     void initializeCodec()
 {
@@ -48,6 +69,8 @@ namespace AC97
     
     outl(BAR0 + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
 
+    setupDMABuffers(BAR1);
+
     // outl(BAR0 + AC97_MASTER_VOL_REG, 0x0000); // Master volume to max
     // outl(BAR0 + AC97_AUX_VOL_REG, 0x0000);    // AUX volume to max
 
@@ -57,7 +80,7 @@ namespace AC97
     Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
 }
 
-
+    
     void play(uint32_t duration)
     {
         outl(BAR1 + 0x06, 0x1C);

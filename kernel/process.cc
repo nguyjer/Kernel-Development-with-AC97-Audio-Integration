@@ -36,23 +36,6 @@ Process::~Process() {
 
 }
 
-void Process::setupDMABuffers(uint32_t nabm_base)
-{
-	if (setupBuffers) {
-		return;
-	}
-	audio_buffers = new AC97::BufferDescriptor[NUM_BUFFERS];
-	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
-	{
-		audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
-		audio_buffers[i].length = 0xFFFE;
-		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
-	}
-
-	// Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
-	Debug::printf("DMA buffers setup completed.\n");
-	setupBuffers = true;
-}
 
 uint32_t swapEndian(uint32_t value)
 {
@@ -95,14 +78,14 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	for (int i = 0; i < 1; i++)
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
-		file->read((char *)audio_buffers[i].pointer, BUFFER_SIZE);
+		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
 		//Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
-		printContents((uint32_t *) audio_buffers[i].pointer);
+		printContents((uint32_t *) AC97::audio_buffers[i].pointer);
 
 	}
 	Debug::printf("Finished Reading Data Buffer...\n");
 
-	file->read((char *)audio_buffers[num_buffers].pointer, (wavhdr->file_size - 44) % BUFFER_SIZE);
+	file->read((char *)AC97::audio_buffers[num_buffers].pointer, (wavhdr->file_size - 44) % BUFFER_SIZE);
 	Debug::printf("Buffers filled!!\n");
 	Debug::printf("file_size = %d\n", wavhdr->file_size);
 	Debug::printf("data_size = %d\n", wavhdr->data_size);
@@ -118,7 +101,7 @@ uint32_t Process::fillBuffers(Shared<File> file) {
     {
         iAmStuckInALoop(true);
     }
-	outl(AC97::BAR1 + 0x00, (uint32_t)(&audio_buffers)); // Set the base address for Buffer Descriptor List
+	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers)); // Set the base address for Buffer Descriptor List
 	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers);	// set number of descriptor entries
 
 

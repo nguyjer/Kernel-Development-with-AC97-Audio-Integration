@@ -48,8 +48,7 @@ QEMU_FLAGS = -no-reboot \
 	     --serial file:$*.raw \
              -drive file=kernel/build/kernel.img,index=0,media=disk,format=raw \
              -drive file=$*.data,index=1,media=disk,format=raw \
-		 -audiodev dsound,id=snd0 \
-         -device AC97,audiodev=snd0 \
+         -device AC97 \
 	     -device isa-debug-exit,iobase=0xf4,iosize=0x04 
 		 
 

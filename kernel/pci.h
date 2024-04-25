@@ -25,6 +25,7 @@ namespace AC97
     extern uint32_t BAR0;
     extern uint32_t BAR1;
     extern uint32_t GCR;
+    extern BufferDescriptor* audio_buffers;
 
     extern bool audioPlaying;
     extern void play(uint32_t duration);
