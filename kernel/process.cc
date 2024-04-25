@@ -2,6 +2,7 @@
 #include "physmem.h"
 #include "debug.h"
 #include "vmm.h"
+#include "pit.h"
 
 // id encoding
 //   upper bit -> sign
@@ -13,7 +14,7 @@ constexpr static uint32_t PROC = 0x10000000;
 constexpr static uint32_t SEM = 0x20000000;
 constexpr static uint32_t INDEX_MASK = 0x0FFFFFFF;
 constexpr uint16_t BUFFER_SIZE = 65535; // 64 KB per buffer
-constexpr uint32_t NUM_BUFFERS = 20;
+constexpr uint32_t NUM_BUFFERS = 32;
 
 Shared<Process> Process::kernelProcess = Shared<Process>::make(true);
 
@@ -44,13 +45,11 @@ void Process::setupDMABuffers(uint32_t nabm_base)
 	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
 	{
 		audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
-		audio_buffers[i].length = BUFFER_SIZE;
+		audio_buffers[i].length = 0xFFFE;
 		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
 	}
 
 	// Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
-	outl(nabm_base + 0x00, (uint32_t)audio_buffers); // Set the base address for Buffer Descriptor List
-	outb(nabm_base + 0x05, (uint8_t)NUM_BUFFERS);	// set number of descriptor entries
 	Debug::printf("DMA buffers setup completed.\n");
 	setupBuffers = true;
 }
@@ -63,6 +62,12 @@ uint32_t swapEndian(uint32_t value)
 		   ((value << 24) & 0xFF000000);
 }
 
+void printContents(uint32_t* buffer) {
+	for (int i = 0; i < 10; i++) {
+		Debug::printf("%x\n", buffer[i]);
+	}
+}
+
 uint32_t Process::fillBuffers(Shared<File> file) {
 	Debug::printf("Filling buffers...\n");
 	// int len = file->size() - 44;
@@ -70,9 +75,15 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 
 	// Debug::printf("Creating hdr buffer...\n");
 	// skip .wav file header
+	outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
+	outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
+	outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
+
+
 	WAVHeader *wavhdr = new WAVHeader;
 	file->read(wavhdr, sizeof(WAVHeader));
 	// Debug::printf("Reading hdr buffer...\n");
+	// wavhdr->data_size = swapEndian(wavhdr->data_size);
 	int num_buffers = (wavhdr->file_size - 44) / BUFFER_SIZE;
 	// check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E') {
@@ -81,11 +92,13 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	}
 	Debug::printf("Starting audio buffers... num = %d\n", num_buffers);
 
-	for (int i = 0; i < num_buffers; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
 		file->read((char *)audio_buffers[i].pointer, BUFFER_SIZE);
-		Debug::printf("Reading Data buffer... i = %x\n", audio_buffers[i]);
+		//Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
+		printContents((uint32_t *) audio_buffers[i].pointer);
+
 	}
 	Debug::printf("Finished Reading Data Buffer...\n");
 
@@ -96,6 +109,18 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	Debug::printf("sample_rate = %d\n", wavhdr->sample_rate);
 	Debug::printf("num channels = %d\n", wavhdr->num_channels);
 	Debug::printf("bitsPerSample = %d\n", wavhdr->bitsPerSample);
+	// Reset the codec by writing to the reset register using outl for 32-bit value simulation
+    outl(AC97::BAR1 + 0xB, 0x2);
+	uint32_t target = Pit::jiffies + Pit::secondsToJiffies(5); // target is 30 seconds
+	// sti();
+	// Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
+    while (Pit::jiffies < target)
+    {
+        iAmStuckInALoop(true);
+    }
+	outl(AC97::BAR1 + 0x00, (uint32_t)(&audio_buffers)); // Set the base address for Buffer Descriptor List
+	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers);	// set number of descriptor entries
+
 
 	return (wavhdr->file_size - 44) / ((wavhdr->sample_rate * wavhdr->num_channels * wavhdr->bitsPerSample) / 8);
 }

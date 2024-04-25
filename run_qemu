@@ -8,5 +8,6 @@ time `make qemu_cmd` `make qemu_config_flags` \
              --monitor none \
              -drive file=kernel/build/kernel.img,index=0,media=disk,format=raw \
              -drive file=$1.data,index=1,media=disk,format=raw \
-             -device ac97 \
+             -audiodev dsound,id=snd0 \
+             -device AC97,audiodev=snd0 \
              -device isa-debug-exit,iobase=0xf4,iosize=0x04 || true

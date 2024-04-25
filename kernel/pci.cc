@@ -22,41 +22,46 @@ namespace AC97
     constexpr uint16_t AC97_EXTENDED_AUDIO_REG = 0x28;
     constexpr uint16_t AC97_PCM_DAC_RATE_REG = 0x2C;
     constexpr uint16_t AC97_NABM_IO_GLOBAL_CONTROL = 0x2C;
-    constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
-    constexpr uint32_t NUM_BUFFERS = 10;
+    constexpr uint16_t BUFFER_SIZE = 65535; // 64 KB per buffer
+    constexpr uint32_t NUM_BUFFERS = 32;
 
     uint32_t BAR0;
     uint32_t BAR1;
+    uint32_t GCR;
     bool audioPlaying = false;
 
     // Initialize AC97 codec and set up basic operation
-    void initializeCodec(uint32_t nam_base, uint32_t nabm_base)
+    void initializeCodec()
 {
+    // Properly setting global control register, ensuring correct register (0x6C)
+    
+    outl(GCR, (0b00<<22) | (0b00<<20) | (0<<2) | (1<<1));
+
+    outb(BAR1 + 0xB, 0x2);
+
     // Reset the codec by writing to the reset register using outl for 32-bit value simulation
-    outl(nam_base + AC97_RESET_REG, 0x00000001);
+    outl(BAR0, 0xFF);
+
 
     // Set volume levels to maximum (0x0000 is maximum, 0x8000 is mute in AC97)
-    outw(nam_base + AC97_MASTER_VOL_REG, 0x0000); // Master volume to max
-    outw(nam_base + AC97_AUX_VOL_REG, 0x0000);    // AUX volume to max
-    outw(nam_base + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
+    //int temp = nam_base + AC97_MASTER_VOL_REG;
+    
+    outl(BAR0 + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
 
-    // Set PCM sample rate to 44100 Hz (CD quality)
-    // Ensuring the rate is set for the entire word and not just a byte
-    outw(nam_base + AC97_PCM_DAC_RATE_REG, 44100);
+    // outl(BAR0 + AC97_MASTER_VOL_REG, 0x0000); // Master volume to max
+    // outl(BAR0 + AC97_AUX_VOL_REG, 0x0000);    // AUX volume to max
 
     // Enable audio output
-    // Properly setting global control register, ensuring correct register (0x6C)
-    uint32_t gctrl = inl(nabm_base + AC97_NABM_IO_GLOBAL_CONTROL);
-    gctrl |= (1 << 1);  // Enable PCM output
-    outl(nabm_base + AC97_NABM_IO_GLOBAL_CONTROL, gctrl);
+    
 
-    Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", nam_base, nabm_base);
+    Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
 }
 
 
     void play(uint32_t duration)
     {
-        outb(BAR1 + 0x0B, 1);
+        outl(BAR1 + 0x06, 0x1C);
+        outb(BAR1 + 0x0B, 0x1);
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;
         uint32_t target = Pit::jiffies + Pit::secondsToJiffies(duration); // target is 30 seconds
@@ -64,11 +69,6 @@ namespace AC97
         // Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
         while (Pit::jiffies < target)
         {
-            //busy wait
-            
-            // gheith::block(gheith::BlockOption::MustBlock, [](gheith::TCB *me)
-            //               { gheith::schedule(me); });
-            // Debug::printf("jiffies = %d\n", Pit::jiffies);
             iAmStuckInALoop(true);
         }
         audioPlaying = false;
@@ -157,8 +157,9 @@ namespace PCI
                     nam_base &= ~0x3;
                     nabm_base &= ~0x3;
                     AC97::BAR0 = nam_base;
-                    AC97::BAR1 = nabm_base;
-                    AC97::initializeCodec(nam_base, nabm_base);
+                    AC97::BAR1 = nabm_base + 0x10;
+                    AC97::GCR = nabm_base + 0x2C;
+                    AC97::initializeCodec();
                     //gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
                 }

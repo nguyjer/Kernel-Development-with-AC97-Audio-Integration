@@ -36,7 +36,7 @@ class Process
     constexpr static int NSEM = 10;
     constexpr static int NCHILD = 10;
     constexpr static int NFILE = 10;
-    constexpr static int NBUFFERS = 20;
+    constexpr static int NBUFFERS = 60;
 
     Shared<File> files[NFILE]{};
     Shared<Semaphore> sems[NSEM]{};
