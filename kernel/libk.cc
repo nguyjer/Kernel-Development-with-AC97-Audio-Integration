@@ -23,7 +23,6 @@ bool K::streq(const char* a, const char* b) {
     }
 }
 
-
 extern "C" void __cxa_pure_virtual() {
     Debug::panic("__cxa_pure_virtual called\n");
 }

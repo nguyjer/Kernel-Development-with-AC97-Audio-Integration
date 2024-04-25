@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "vmm.h"
 #include "pit.h"
+#include "libk.h"
 
 // id encoding
 //   upper bit -> sign
@@ -51,6 +52,25 @@ void printContents(uint32_t* buffer) {
 	}
 }
 
+void clear_memory(uint32_t memory, uint32_t length)
+{
+	uint32_t *mem32 = (uint32_t *)(memory);
+
+	for (uint32_t i = 0; i < (length / 4); i++)
+	{
+		*mem32 = 0;
+		mem32++;
+	}
+
+	uint8_t *mem8 = (uint8_t *)(mem32);
+
+	for (uint32_t i = 0; i < (length % 4); i++)
+	{
+		*mem8 = 0;
+		mem8++;
+	}
+}
+
 uint32_t Process::fillBuffers(Shared<File> file) {
 	Debug::printf("Filling buffers...\n");
 	// int len = file->size() - 44;
@@ -62,12 +82,16 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
 	outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
 
+	// clear_memory((uint32_t)AC97::audio_buffers, (sizeof(AC97::BufferDescriptor) * 32));
+	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers)); // Set the base address for Buffer Descriptor List
 
 	WAVHeader *wavhdr = new WAVHeader;
 	file->read(wavhdr, sizeof(WAVHeader));
 	// Debug::printf("Reading hdr buffer...\n");
 	// wavhdr->data_size = swapEndian(wavhdr->data_size);
 	int num_buffers = (wavhdr->file_size - 44) / BUFFER_SIZE;
+
+	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers); // set number of descriptor entries
 	// check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E') {
 		Debug::printf("*** Trying to play a non-WAV audio file.\n");
@@ -75,12 +99,13 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	}
 	Debug::printf("Starting audio buffers... num = %d\n", num_buffers);
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < num_buffers; i++)
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
+		// AC97::audio_buffers[i].length = wavhdr->sample_rate * (wavhdr->bitsPerSample / 8);
 		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
 		//Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
-		printContents((uint32_t *) AC97::audio_buffers[i].pointer);
+		// printContents((uint32_t *) AC97::audio_buffers[i].pointer);
 
 	}
 	Debug::printf("Finished Reading Data Buffer...\n");
@@ -93,16 +118,14 @@ uint32_t Process::fillBuffers(Shared<File> file) {
 	Debug::printf("num channels = %d\n", wavhdr->num_channels);
 	Debug::printf("bitsPerSample = %d\n", wavhdr->bitsPerSample);
 	// Reset the codec by writing to the reset register using outl for 32-bit value simulation
-    outl(AC97::BAR1 + 0xB, 0x2);
-	uint32_t target = Pit::jiffies + Pit::secondsToJiffies(5); // target is 30 seconds
-	// sti();
-	// Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
-    while (Pit::jiffies < target)
-    {
-        iAmStuckInALoop(true);
-    }
-	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers)); // Set the base address for Buffer Descriptor List
-	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers);	// set number of descriptor entries
+    // outl(AC97::BAR1 + 0xB, 0x2);
+	// uint32_t target = Pit::jiffies + Pit::secondsToJiffies(5); // target is 30 seconds
+	// // sti();
+	// // Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
+    // while (Pit::jiffies < target)
+    // {
+    //     iAmStuckInALoop(true);
+    // }
 
 
 	return (wavhdr->file_size - 44) / ((wavhdr->sample_rate * wavhdr->num_channels * wavhdr->bitsPerSample) / 8);
