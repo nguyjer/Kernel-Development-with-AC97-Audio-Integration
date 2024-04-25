@@ -40,9 +40,9 @@ void Process::setupDMABuffers(uint32_t nabm_base)
 	if (setupBuffers) {
 		return;
 	}
+	audio_buffers = new AC97::BufferDescriptor[NUM_BUFFERS];
 	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
 	{
-		audio_buffers[i] = *(new AC97::BufferDescriptor);
 		audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
 		audio_buffers[i].length = BUFFER_SIZE;
 		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
