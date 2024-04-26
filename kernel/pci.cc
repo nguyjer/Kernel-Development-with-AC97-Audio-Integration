@@ -60,12 +60,12 @@ namespace AC97
         outb(BAR1 + 0xB, 0x2);
 
         // Reset the codec by writing to the reset register using outl for 32-bit value simulation
-        outl(BAR0, 0xFF);
+        outw(BAR0, 0xFF);
 
         // Set volume levels to maximum (0x0000 is maximum, 0x8000 is mute in AC97)
         // int temp = nam_base + AC97_MASTER_VOL_REG;
 
-        outl(BAR0 + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
+        outw(BAR0 + AC97_PCM_OUT_VOL_REG, 0x0); // PCM volume to max
 
         setupDMABuffers(BAR1);
 
@@ -79,10 +79,7 @@ namespace AC97
 
     void play(uint32_t duration)
     {
-        outl(BAR1 + 0x06, 0x1C);
-        outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
-        outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
-        outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
+        outw(BAR1 + 0x06, 0x1C);
         outb(BAR1 + 0x0B, 0x1);
         Debug::printf("Started playing audio.\n");
         audioPlaying = true;

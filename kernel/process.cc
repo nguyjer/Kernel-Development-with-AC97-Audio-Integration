@@ -107,7 +107,6 @@ void findWavHDR(Shared<File> file, WAVHeader *wavhdr)
 	}
 	file->read(((char *)wavhdr) + 16, 4);
 	file->read(((char *)wavhdr) + 20, wavhdr->fmt_length + 4);
-	// char *data = new char[4];
 	Debug::printf("first data = %c%c%c%c\n", wavhdr->data[0], wavhdr->data[1], wavhdr->data[2], wavhdr->data[3]);
 	
 	while (wavhdr->data[0] != 'd' || wavhdr->data[1] != 'a' || wavhdr->data[2] != 't' || wavhdr->data[3] != 'a')
@@ -117,7 +116,6 @@ void findWavHDR(Shared<File> file, WAVHeader *wavhdr)
 		file->read(((char *)wavhdr) + 36, 4);
 		Debug::printf("data = %c%c%c%c\n", wavhdr->data[0], wavhdr->data[1], wavhdr->data[2], wavhdr->data[3]);
 	}
-	// delete data;
 	file->read(((char *)wavhdr) + 40, 4);
 }
 
@@ -129,7 +127,7 @@ uint32_t Process::fillBuffers(Shared<File> file)
 	findWavHDR(file, wavhdr);
 
 	int num_buffers = wavhdr->data_size / BUFFER_SIZE;
-	// int num_buffers = 31;
+
 	// check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E')
 	{
@@ -162,7 +160,7 @@ uint32_t Process::fillBuffers(Shared<File> file)
 
 	ac97_set_sample_rate(wavhdr->sample_rate);
 	// Reset the codec by writing to the reset register using outl for 32-bit value simulation
-	outl(AC97::BAR1 + 0xB, 0x2);
+	// outl(AC97::BAR1 + 0xB, 0x2);
 
 	return wavhdr->data_size / wavhdr->sample_rate_eq;
 }
