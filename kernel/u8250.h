@@ -21,6 +21,7 @@ public:
     bool isFile() override { return true; }
     bool isDirectory() override { return false; }
     off_t seek(off_t offset) { return offset; }
+    off_t getOffset() { return 0; }
     off_t size() { return 0x7FFFFFFF; }
     ssize_t read(void* buffer, size_t n) {
         if (n == 0) return 0;

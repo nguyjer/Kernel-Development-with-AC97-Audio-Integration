@@ -11,6 +11,7 @@ class OpenFileStruct : public File
     off_t myOffset;
 
 public:
+    
     OpenFileStruct(Shared<Node> node) : node(node)
     {
         myOffset = 0;
@@ -50,6 +51,7 @@ public:
         Debug::printf("Can't write to files.\n");
         return -1;
     }
+    off_t getOffset() { return myOffset; }
 };
 
 #endif

@@ -27,7 +27,7 @@ struct WAVHeader
     uint32_t sample_rate_eq;
     uint16_t garb;
     uint16_t bitsPerSample;
-    unsigned char start_of_data[4];
+    unsigned char data[4];
     uint32_t data_size;
 };
 

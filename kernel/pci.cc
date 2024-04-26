@@ -14,8 +14,6 @@
 #define AC97_DEVICE_ID 0x2415 // Example: AC97's device ID
 bool setupBuffers = false;
 
-
-
 namespace AC97
 {
     constexpr uint16_t AC97_RESET_REG = 0x00;
@@ -31,56 +29,54 @@ namespace AC97
     uint32_t BAR0;
     uint32_t BAR1;
     uint32_t GCR;
-    BufferDescriptor* audio_buffers;
+    BufferDescriptor *audio_buffers;
 
     bool audioPlaying = false;
-void setupDMABuffers(uint32_t nabm_base)
-{
-	if (setupBuffers) {
-		return;
-	}
-	audio_buffers = new AC97::BufferDescriptor[NUM_BUFFERS];
-	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
-	{
-		audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
-		audio_buffers[i].length = 0xFFFE;
-		audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
-	}
+    void setupDMABuffers(uint32_t nabm_base)
+    {
+        if (setupBuffers)
+        {
+            return;
+        }
+        audio_buffers = new AC97::BufferDescriptor[NUM_BUFFERS];
+        for (uint32_t i = 0; i < NUM_BUFFERS; i++)
+        {
+            audio_buffers[i].pointer = (uint32_t) new char[BUFFER_SIZE];
+            audio_buffers[i].length = 0xFFFE;
+            audio_buffers[i].control = 0; // Set appropriate control flags based on hardware spec
+        }
 
-	// Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
-	Debug::printf("DMA buffers setup completed.\n");
-	setupBuffers = true;
-}
+        // Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
+        Debug::printf("DMA buffers setup completed.\n");
+        setupBuffers = true;
+    }
     // Initialize AC97 codec and set up basic operation
     void initializeCodec()
-{
-    // Properly setting global control register, ensuring correct register (0x6C)
-    
-    outl(GCR, (0b00<<22) | (0b00<<20) | (0<<2) | (1<<1));
+    {
+        // Properly setting global control register, ensuring correct register (0x6C)
 
-    outb(BAR1 + 0xB, 0x2);
+        outl(GCR, (0b00 << 22) | (0b00 << 20) | (0 << 2) | (1 << 1));
 
-    // Reset the codec by writing to the reset register using outl for 32-bit value simulation
-    outl(BAR0, 0xFF);
+        outb(BAR1 + 0xB, 0x2);
 
+        // Reset the codec by writing to the reset register using outl for 32-bit value simulation
+        outl(BAR0, 0xFF);
 
-    // Set volume levels to maximum (0x0000 is maximum, 0x8000 is mute in AC97)
-    //int temp = nam_base + AC97_MASTER_VOL_REG;
-    
-    outl(BAR0 + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
+        // Set volume levels to maximum (0x0000 is maximum, 0x8000 is mute in AC97)
+        // int temp = nam_base + AC97_MASTER_VOL_REG;
 
-    setupDMABuffers(BAR1);
+        outl(BAR0 + AC97_PCM_OUT_VOL_REG, 0x0000); // PCM volume to max
 
-    // outl(BAR0 + AC97_MASTER_VOL_REG, 0x0000); // Master volume to max
-    // outl(BAR0 + AC97_AUX_VOL_REG, 0x0000);    // AUX volume to max
+        setupDMABuffers(BAR1);
 
-    // Enable audio output
-    
+        // outl(BAR0 + AC97_MASTER_VOL_REG, 0x0000); // Master volume to max
+        // outl(BAR0 + AC97_AUX_VOL_REG, 0x0000);    // AUX volume to max
 
-    Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
-}
+        // Enable audio output
 
-    
+        Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
+    }
+
     void play(uint32_t duration)
     {
         outl(BAR1 + 0x06, 0x1C);
@@ -101,7 +97,8 @@ void setupDMABuffers(uint32_t nabm_base)
         Debug::printf("Finished playing audio.\n");
     }
 
-    bool isPlaying() {
+    bool isPlaying()
+    {
         return audioPlaying;
     }
 }
@@ -166,14 +163,13 @@ namespace PCI
                 uint16_t device_id = pciConfigReadWord(bus, device, 0, 2);
                 // if (bus == 0 && device == 4)
                 // {
-                    // Debug::printf("Suppose to be AC97 vendor_id = %d device_id = %d\n", vendor_id, device_id);
+                // Debug::printf("Suppose to be AC97 vendor_id = %d device_id = %d\n", vendor_id, device_id);
                 // }
                 if (vendor_id == 0xFFFF)
                 {
                     continue;
                 }
-                
-                
+
                 if (vendor_id == AC97_VENDOR_ID && device_id == AC97_DEVICE_ID)
                 {
                     Debug::printf("Found AC97.\n");
@@ -186,7 +182,7 @@ namespace PCI
                     AC97::BAR1 = nabm_base + 0x10;
                     AC97::GCR = nabm_base + 0x2C;
                     AC97::initializeCodec();
-                    //gheith::current()->process->setupDMABuffers(nabm_base);
+                    // gheith::current()->process->setupDMABuffers(nabm_base);
                     return;
                 }
             }
