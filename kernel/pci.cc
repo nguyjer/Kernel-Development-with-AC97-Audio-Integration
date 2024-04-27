@@ -23,7 +23,7 @@ namespace AC97
     constexpr uint16_t AC97_EXTENDED_AUDIO_REG = 0x28;
     constexpr uint16_t AC97_PCM_DAC_RATE_REG = 0x2C;
     constexpr uint16_t AC97_NABM_IO_GLOBAL_CONTROL = 0x2C;
-    constexpr uint16_t BUFFER_SIZE = 65535; // 64 KB per buffer
+    constexpr uint32_t BUFFER_SIZE = 65536; // 64 KB per buffer
     constexpr uint32_t NUM_BUFFERS = 32;
 
     uint32_t BAR0;
