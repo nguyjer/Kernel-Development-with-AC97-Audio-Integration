@@ -18,7 +18,7 @@ constexpr static uint32_t FL = 0x00000000;
 constexpr static uint32_t PROC = 0x10000000;
 constexpr static uint32_t SEM = 0x20000000;
 constexpr static uint32_t INDEX_MASK = 0x0FFFFFFF;
-constexpr uint32_t BUFFER_SIZE = 65536; // 128 KB per buffer
+constexpr uint32_t BUFFER_SIZE = 131070; // 128 KB per buffer
 constexpr uint32_t NUM_BUFFERS = 32;
 
 Shared<Process> Process::kernelProcess = Shared<Process>::make(true);
@@ -126,8 +126,8 @@ uint32_t Process::fillBuffers(Shared<File> file)
 	WAVHeader *wavhdr = new WAVHeader;
 	findWavHDR(file, wavhdr);
 
-	// int num_buffers = wavhdr->data_size / BUFFER_SIZE;
-	int num_buffers = 31;
+	int num_buffers = wavhdr->data_size / BUFFER_SIZE;
+	// int num_buffers = 32;
 
 	// check file header
 	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E')
@@ -144,14 +144,14 @@ uint32_t Process::fillBuffers(Shared<File> file)
 	for (int i = 0; i < num_buffers; i++)
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
-		AC97::audio_buffers[i].length = wavhdr->sample_rate_eq;
+		AC97::audio_buffers[i].length = 0xFFFE;
 		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
 		// Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
 		//  printContents((uint32_t *) AC97::audio_buffers[i].pointer);
 	}
 	// Debug::printf("Finished Reading Data Buffer...\n");
-	AC97::audio_buffers[num_buffers].length = wavhdr->sample_rate_eq;
-	file->read((char *)AC97::audio_buffers[num_buffers].pointer, BUFFER_SIZE);
+	// AC97::audio_buffers[num_buffers].length = wavhdr->sample_rate_eq;
+	// file->read((char *)AC97::audio_buffers[num_buffers].pointer, BUFFER_SIZE);
 	Debug::printf("Buffers filled!!\n");
 	Debug::printf("file_size = %d\n", wavhdr->file_size);
 	Debug::printf("data_size = %d\n", wavhdr->data_size);

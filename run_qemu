@@ -1,6 +1,6 @@
 set -e
 
-#UTCS_OPT=-O3 make clean the_kernel $1.data
+UTCS_OPT=-O3 make clean the_kernel $1.data
 
 time `make qemu_cmd` `make qemu_config_flags` \
              -no-reboot \
