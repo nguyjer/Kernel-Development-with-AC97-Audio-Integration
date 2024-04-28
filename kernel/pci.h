@@ -26,7 +26,7 @@ namespace AC97
     extern BufferDescriptor* audio_buffers;
 
     extern bool audioPlaying;
-    extern void play(uint32_t duration);
+    extern void play(uint32_t duration, uint32_t jiffies);
     extern bool isPlaying();
 }
 

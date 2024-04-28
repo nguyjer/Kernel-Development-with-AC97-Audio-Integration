@@ -61,8 +61,8 @@ public:
     Shared<Process> fork(int &id);
     void clear_private();
 
-
-    uint32_t fillBuffers(Shared<File> file);
+    void findWavHDR(Shared<File> file, WAVHeader *wavhdr);
+    void fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size);
 
     int newSemaphore(uint32_t init);
 

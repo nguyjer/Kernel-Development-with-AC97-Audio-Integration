@@ -92,7 +92,7 @@ void ac97_set_sample_rate(uint16_t sample_rate)
 	Debug::printf("sample rate register = %u\n", inw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_FRONT_DAC));
 }
 
-void findWavHDR(Shared<File> file, WAVHeader *wavhdr)
+void Process::findWavHDR(Shared<File> file, WAVHeader *wavhdr)
 {
 	file->read(wavhdr, 16);
 	// char *fmt = new char[4];
@@ -119,54 +119,44 @@ void findWavHDR(Shared<File> file, WAVHeader *wavhdr)
 	file->read(((char *)wavhdr) + 40, 4);
 }
 
-uint32_t Process::fillBuffers(Shared<File> file)
+void Process::fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size)
 {
 	Debug::printf("Filling buffers...\n");
 
-	WAVHeader *wavhdr = new WAVHeader;
-	findWavHDR(file, wavhdr);
-
-	int num_buffers = wavhdr->data_size / BUFFER_SIZE;
-	// int num_buffers = 32;
-
-	// check file header
-	if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E')
-	{
-		Debug::printf("*** Trying to play a non-WAV audio file.\n");
-		return -1;
-	}
+	uint32_t num_buffers = last ? data_size / BUFFER_SIZE : 32;
 
 	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers)); // Set the base address for Buffer Descriptor List
 	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers);			  // set number of descriptor entries
 
 	Debug::printf("Starting audio buffers... num = %d\n", num_buffers);
 
-	for (int i = 0; i < num_buffers; i++)
+	for (uint32_t i = 0; i < num_buffers; i++)
 	{
 		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
 		AC97::audio_buffers[i].length = 0xFFFE;
 		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
+		data_size -= BUFFER_SIZE;
 		// Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
-		 printContents((uint32_t *) AC97::audio_buffers[i].pointer);
+		//  printContents((uint32_t *) AC97::audio_buffers[i].pointer);
+	}
+	if (last) {
+		AC97::audio_buffers[num_buffers].length = 0xFFFE;
+		file->read((char *)AC97::audio_buffers[num_buffers].pointer, data_size);
 	}
 	// Debug::printf("Finished Reading Data Buffer...\n");
 	// AC97::audio_buffers[num_buffers].length = wavhdr->sample_rate_eq;
 	// file->read((char *)AC97::audio_buffers[num_buffers].pointer, BUFFER_SIZE);
 	Debug::printf("Buffers filled!!\n");
-	Debug::printf("file_size = %d\n", wavhdr->file_size);
-	Debug::printf("data_size = %d\n", wavhdr->data_size);
-	Debug::printf("sample_rate = %d\n", wavhdr->sample_rate);
-	Debug::printf("num channels = %d\n", wavhdr->num_channels);
-	Debug::printf("bitsPerSample = %d\n", wavhdr->bitsPerSample);
 
-	ac97_set_sample_rate(wavhdr->sample_rate);
+
+	ac97_set_sample_rate(sampleRate);
 	outl(AC97::BAR1 + 0xB, 0x2);
 	while (inl(AC97::BAR1 + 0xB) == 0x2) {
 		// Debug::printf("hello");
 		iAmStuckInALoop(true);
 	} 
 
-	return wavhdr->data_size / wavhdr->sample_rate_eq;
+	return;
 }
 
 // void freeBuffers() 

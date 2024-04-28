@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 {
 
     
-    int fd = open("/data/stereo.wav", 0);
+    int fd = open("/data/bigmotion.wav", 0);
     play_audio(fd);
     seek(fd, 0);
     play_audio(fd);

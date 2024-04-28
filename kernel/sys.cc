@@ -195,9 +195,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         int id = -1;
         Shared<Process> child = current()->process->fork(id);
         thread(child, [userPC, userEsp]
-               {
-                   switchToUser(userPC, (uint32_t)userEsp, 0); // return 0 in eax if child
-               });
+               { switchToUser(userPC, (uint32_t)userEsp, 0); });
         return id;
     }
     case 3: /* sem */
@@ -402,18 +400,52 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         {
             return -1;
         } //else if it is a valid audio file
-        outb(AC97::GCR, inb(AC97::BAR1 + 0xB) | 0x4);
+        WAVHeader *wavhdr = new WAVHeader;
+        current()->process->findWavHDR(file, wavhdr);
 
-        uint32_t duration = current()->process->fillBuffers(file);
-        //set the play bit to 1
-        if (duration == (uint32_t)-1) {
+        if (wavhdr->magic0 != 'W' || wavhdr->magic1 != 'A' || wavhdr->magic2 != 'V' || wavhdr->magic3 != 'E')
+        {
+            Debug::printf("*** Trying to play a non-WAV audio file.\n");
             return -1;
         }
-        Debug::printf("duration = %d\n", duration);
-        outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
-        outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
-        outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
-        AC97::play(duration);
+
+        // int num_buffers = wavhdr->data_size / 131070;
+        uint32_t data_size = wavhdr->data_size;
+        uint32_t buffer_size = 131070;
+        while (data_size > 0)
+        {
+            uint32_t duration;
+            uint32_t jiffies;
+            if (data_size < (32 * buffer_size))
+            {
+                current()->process->fillBuffers(file, wavhdr->sample_rate, true, data_size);
+                duration = data_size / wavhdr->sample_rate_eq;
+                jiffies = (((data_size )) % wavhdr->sample_rate_eq);
+                jiffies *= 1000;
+                jiffies /= wavhdr->sample_rate_eq;
+                data_size = 0;
+            }
+            else
+            {
+                current()->process->fillBuffers(file, wavhdr->sample_rate, false, data_size);
+                duration = (32 * buffer_size) / wavhdr->sample_rate_eq;
+                jiffies = ((32 * buffer_size) % wavhdr->sample_rate_eq);
+                jiffies *= 1000;
+                jiffies /= wavhdr->sample_rate_eq;
+                data_size -= (32 * 131070);
+            }
+            //set the play bit to 1
+            if (duration == (uint32_t)-1)
+            {
+                return -1;
+            }
+            Debug::printf("duration = %d\n", duration);
+            // outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
+            // outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
+            // outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
+            AC97::play(duration, jiffies);
+            
+        }
 
         return 1;
     }
