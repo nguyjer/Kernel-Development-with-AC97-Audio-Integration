@@ -81,15 +81,14 @@ namespace AC97
         outw(BAR1 + 0x06, 0x1C);
         outb(BAR1 + 0x0B, 0x1);
         Debug::printf("Started playing audio.\n");
-        audioPlaying = true;
-        uint32_t target = Pit::jiffies + Pit::secondsToJiffies(duration); // target is 30 seconds
+        uint32_t target = Pit::jiffies + Pit::secondsToJiffies(duration); 
         // sti();
         // Debug::printf("jiffies per second = %d\n", Pit::secondsToJiffies(30));
         while (Pit::jiffies < target)
         {
             iAmStuckInALoop(true);
         }
-        outb(BAR1 + 0x0B, 0x0);
+        outb(BAR1 + 0x0B, 0x2);
         Debug::printf("Finished playing audio.\n");
     }
 

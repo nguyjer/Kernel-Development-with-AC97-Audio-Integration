@@ -147,7 +147,7 @@ uint32_t Process::fillBuffers(Shared<File> file)
 		AC97::audio_buffers[i].length = 0xFFFE;
 		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
 		// Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
-		//  printContents((uint32_t *) AC97::audio_buffers[i].pointer);
+		 printContents((uint32_t *) AC97::audio_buffers[i].pointer);
 	}
 	// Debug::printf("Finished Reading Data Buffer...\n");
 	// AC97::audio_buffers[num_buffers].length = wavhdr->sample_rate_eq;
@@ -161,9 +161,15 @@ uint32_t Process::fillBuffers(Shared<File> file)
 
 	ac97_set_sample_rate(wavhdr->sample_rate);
 	outl(AC97::BAR1 + 0xB, 0x2);
+	while (inl(AC97::BAR1 + 0xB) == 0x2) {
+		// Debug::printf("hello");
+		iAmStuckInALoop(true);
+	} 
 
 	return wavhdr->data_size / wavhdr->sample_rate_eq;
 }
+
+// void freeBuffers() 
 
 int Process::newSemaphore(uint32_t init)
 {
