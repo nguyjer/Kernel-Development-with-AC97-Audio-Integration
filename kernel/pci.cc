@@ -46,7 +46,7 @@ namespace AC97
         }
 
         // Assuming the first descriptor is located at nabm_base + 0x00 for PCM Out
-        Debug::printf("DMA buffers setup completed.\n");
+        // Debug::printf("| DMA buffers setup completed.\n");
         setupBuffers = true;
     }
     // Initialize AC97 codec and set up basic operation
@@ -73,7 +73,7 @@ namespace AC97
 
         // Enable audio output
 
-        Debug::printf("AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
+        Debug::printf("| AC97 codec initialized with NAM base I/O address 0x%X and NABM base I/O address 0x%X\n", BAR0, BAR1);
     }
 
     void play(uint32_t duration, uint32_t jiffies)
@@ -142,7 +142,7 @@ namespace PCI
 
         // Write the modified command register back to the PCI configuration space
         pciConfigWriteWord(bus, device, function, 0x04, command_register);
-        Debug::printf("Enabled PCI register\n");
+        Debug::printf("| Enabled PCI register\n");
     }
 
     void findAC97()
@@ -167,7 +167,7 @@ namespace PCI
 
                 if (vendor_id == AC97_VENDOR_ID && device_id == AC97_DEVICE_ID)
                 {
-                    Debug::printf("Found AC97.\n");
+                    Debug::printf("| Found AC97.\n");
                     enablePCICommandRegister(bus, device, 0);
                     uint32_t nam_base = pciConfigReadDWord(bus, device, 0, 0x10);
                     uint32_t nabm_base = pciConfigReadDWord(bus, device, 0, 0x14);
@@ -182,6 +182,6 @@ namespace PCI
                 }
             }
         }
-        Debug::printf("AC97 sound card not found\n");
+        Debug::panic("XXX AC97 sound card not found\n");
     }
 }

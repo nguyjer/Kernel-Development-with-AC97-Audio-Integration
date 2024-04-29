@@ -82,84 +82,73 @@ void ac97_set_sample_rate(uint16_t sample_rate)
 {
 	// check if variable sample rate feature is present
 	using namespace AC97;
-	Debug::printf("sample rate = %d\n", sample_rate);
+	// Debug::printf("sample rate = %d\n", sample_rate);
 	// set same variable rate on all outputs
 	outw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_FRONT_DAC, sample_rate);
 	outw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_SURR_DAC, sample_rate);
 	outw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_LFE_DAC, sample_rate);
 	outw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_LR_ADC, sample_rate);
 
-	Debug::printf("sample rate register = %u\n", inw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_FRONT_DAC));
+	// Debug::printf("sample rate register = %u\n", inw(BAR0 + AC97_NAM_IO_VARIABLE_SAMPLE_RATE_FRONT_DAC));
 }
 
 void Process::findWavHDR(Shared<File> file, WAVHeader *wavhdr)
 {
 	file->read(wavhdr, 16);
-	// char *fmt = new char[4];
-	Debug::printf("first fmt = %c%c%c%c\n", wavhdr->fmt[0], wavhdr->fmt[1], wavhdr->fmt[2], wavhdr->fmt[3]);
 
 	while (wavhdr->fmt[0] != 'f' || wavhdr->fmt[1] != 'm' || wavhdr->fmt[2] != 't' || wavhdr->fmt[3] != ' ')
 	{
 		file->read(((char *)wavhdr) + 16, 4);
 		file->seek(file->getOffset() + wavhdr->fmt_length);
-		file->read(((char*)wavhdr) + 12, 4);
-		Debug::printf("fmt = %c%c%c%c\n", wavhdr->fmt[0], wavhdr->fmt[1], wavhdr->fmt[2], wavhdr->fmt[3]);
+		file->read(((char *)wavhdr) + 12, 4);
 	}
+
 	file->read(((char *)wavhdr) + 16, 4);
 	file->read(((char *)wavhdr) + 20, wavhdr->fmt_length + 4);
-	Debug::printf("first data = %c%c%c%c\n", wavhdr->data[0], wavhdr->data[1], wavhdr->data[2], wavhdr->data[3]);
-	
+
 	while (wavhdr->data[0] != 'd' || wavhdr->data[1] != 'a' || wavhdr->data[2] != 't' || wavhdr->data[3] != 'a')
 	{
 		file->read(((char *)wavhdr) + 40, 4);
 		file->seek(file->getOffset() + wavhdr->data_size);
 		file->read(((char *)wavhdr) + 36, 4);
-		Debug::printf("data = %c%c%c%c\n", wavhdr->data[0], wavhdr->data[1], wavhdr->data[2], wavhdr->data[3]);
 	}
 	file->read(((char *)wavhdr) + 40, 4);
 }
 
-void Process::fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size)
+void Process::fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size, uint32_t totalSamples)
 {
 	Debug::printf("Filling buffers...\n");
 
 	uint32_t num_buffers = last ? data_size / BUFFER_SIZE : 32;
 
-	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers)); // Set the base address for Buffer Descriptor List
-	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers);			  // set number of descriptor entries
-
-	Debug::printf("Starting audio buffers... num = %d\n", num_buffers);
+	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers));		// Set the base address for Buffer Descriptor List
+	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers + (last ? 1 : 0)); // set number of descriptor entries
 
 	for (uint32_t i = 0; i < num_buffers; i++)
 	{
-		// Debug::printf("Print audio buffer %x\n", audio_buffers[i].pointer);
 		AC97::audio_buffers[i].length = 0xFFFE;
 		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
 		data_size -= BUFFER_SIZE;
-		// Debug::printf("Reading Data buffer... i = %x\n", *((uint32_t *)(audio_buffers[i].pointer)));
+		totalSamples -= 0xFFFF;
 		//  printContents((uint32_t *) AC97::audio_buffers[i].pointer);
 	}
-	if (last) {
-		AC97::audio_buffers[num_buffers].length = 0xFFFE;
+	if (last)
+	{
+		AC97::audio_buffers[num_buffers].length = (totalSamples - 1);
 		file->read((char *)AC97::audio_buffers[num_buffers].pointer, data_size);
 	}
-	// Debug::printf("Finished Reading Data Buffer...\n");
-	// AC97::audio_buffers[num_buffers].length = wavhdr->sample_rate_eq;
-	// file->read((char *)AC97::audio_buffers[num_buffers].pointer, BUFFER_SIZE);
-	Debug::printf("Buffers filled!!\n");
-
+	Debug::printf("...Buffers filled!!\n");
 
 	ac97_set_sample_rate(sampleRate);
 	outl(AC97::BAR1 + 0xB, 0x2);
-	while (inl(AC97::BAR1 + 0xB) == 0x2) {
+	while (inl(AC97::BAR1 + 0xB) == 0x2)
+	{
 		// Debug::printf("hello");
 		iAmStuckInALoop(true);
-	} 
+	}
 
 	return;
 }
-
-// void freeBuffers() 
 
 int Process::newSemaphore(uint32_t init)
 {

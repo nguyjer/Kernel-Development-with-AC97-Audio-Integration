@@ -11,6 +11,7 @@
 #include "u8250.h"
 #include "shared.h"
 #include "pci.h"
+
 struct WAVHeader
 {
     unsigned char riff[4];
@@ -42,7 +43,6 @@ class Process
     Shared<Semaphore> sems[NSEM]{};
     Shared<Future<uint32_t>> children[NCHILD]{};
     BlockingLock mutex{};
-    
 
     int getChildIndex(int id);
     int getSemaphoreIndex(int id);
@@ -62,7 +62,7 @@ public:
     void clear_private();
 
     void findWavHDR(Shared<File> file, WAVHeader *wavhdr);
-    void fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size);
+    void fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size, uint32_t totalSamples);
 
     int newSemaphore(uint32_t init);
 

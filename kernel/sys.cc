@@ -64,9 +64,7 @@ int SYS::exec(const char *path,
     {
         return -1;
     }
-    // Debug::printf("%d, %c, %c, %c\n", hdr.magic0, hdr.magic1, hdr.magic2, hdr.magic3);
-    // Debug::printf("EXEC path = %s\n", path);
-    // Debug::printf("EXEC argc = %d", argc);
+
     for (int i = 0; i < argc; i++)
     {
         // //Debug::printf("argv[%d] = %s\n", i, argv[i]);
@@ -109,14 +107,12 @@ int SYS::exec(const char *path,
 
     sp -= 4;
     *((uint32_t *)sp) = 0; // nullptr to indicate end of the argv array
-    // //Debug::printf("argc = %d\n", argc);
-    // //Debug::printf("sp = %x\n", sp);
+
 
     for (int i = argc - 1; i >= 0; i--)
     {
         sp -= 4;
         *((uint32_t *)sp) = addresses[i];
-        // ////Debug::printf("this arg = %s at %x\n", *((char **)sp), addresses[i]);
     }
     sp -= 4;
     *((uint32_t *)sp) = sp + 4;
@@ -132,22 +128,7 @@ int SYS::exec(const char *path,
     uint32_t e = ELF::load(file);
 
     file = nullptr;
-    // uint32_t* temp_sp = (uint32_t*)sp;
-    //  ////Debug::printf("ARGC = %d\n", *temp_sp);
-    //  temp_sp++;
-    //  while (*temp_sp != 0)
-    //  {
-    //      ////Debug::printf("EXEC: %s\n", *temp_sp);
-    //      temp_sp++;
-    //  }
 
-    // while (temp_sp <= 0xefffe000)
-    // {
-    //     ////Debug::printf("SP = %x\n", temp_sp);
-    //     ////Debug::printf("EXEC: %x\n", *((uint32_t *)temp_sp));
-    //     temp_sp+=4;
-    // }
-    // ////Debug::printf("Calling switch\n");
     switchToUser(e, sp, 0);
     Debug::panic("*** implement switchToUser");
     return -1;
@@ -202,8 +183,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     {
         uint32_t init = userEsp[1];
         int id = -1;
-        Interrupts::protect([init, &id]
-                            { id = activeThreads[SMP::me()]->process->newSemaphore(init); });
+        id = current()->process->newSemaphore(init);
         return id;
     }
 
@@ -211,8 +191,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     {
         int id = (int)userEsp[1];
         Shared<Semaphore> sem;
-        Interrupts::protect([id, &sem]
-                            { sem = activeThreads[SMP::me()]->process->getSemaphore(id); });
+        sem = current()->process->getSemaphore(id);
         if (sem == nullptr)
         {
             return -1;
@@ -224,8 +203,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     {
         int id = (int)userEsp[1];
         Shared<Semaphore> sem;
-        Interrupts::protect([id, &sem]
-                            { sem = activeThreads[SMP::me()]->process->getSemaphore(id); });
+        sem = current()->process->getSemaphore(id);
         if (sem == nullptr)
         {
             return -1;
@@ -236,7 +214,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     case 6: /* close */
     {
         int id = (int)userEsp[1];
-        return activeThreads[SMP::me()]->process->close(id);
+        return current()->process->close(id);
     };
 
     case 7: /* shutdown */
@@ -248,16 +226,11 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         /* wait for a child, status filled with exit value from child */
         /* return 0 on success, -ve value on failure */
 
-        int id = (int)userEsp[1];
-        uint32_t *status = (uint32_t *)userEsp[2];
-        if (status < (uint32_t *)0x80000000 || status == (uint32_t *)kConfig.ioAPIC || status == (uint32_t *)kConfig.localAPIC)
+        if ((uint32_t *)userEsp[2] == nullptr || userEsp[2] < 0x80000000 || userEsp[2] == kConfig.ioAPIC || userEsp[2] == kConfig.localAPIC)
         {
-            // Debug::printf("Passing in kernel pointer in wait.\n");
             return -1;
         }
-        Interrupts::protect([id, status]
-                            { activeThreads[SMP::me()]->process->wait(id, status); });
-        return *status;
+        return current()->process->wait((int)userEsp[1], (uint32_t *)userEsp[2]);
     }
     case 9:
     {
@@ -331,14 +304,13 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         File *temp = new OpenFileStruct(node);
         Shared<File> ofs(temp);
         int fd = -1;
-        Interrupts::protect([ofs, &fd]()
-                            { fd = activeThreads[SMP::me()]->process->setFile(ofs); });
+        fd = current()->process->setFile(ofs);
         return fd;
     }
     case 11: /* len */
     {
         int fd = (int)userEsp[1];
-        auto file = activeThreads[SMP::me()]->process->getFile(fd);
+        auto file = current()->process->getFile(fd);
         if (file == nullptr)
         {
             return -1;
@@ -376,7 +348,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     {
         int fd = (int)userEsp[1];
         int offset = (int)userEsp[2];
-        auto file = activeThreads[SMP::me()]->process->getFile(fd);
+        auto file = current()->process->getFile(fd);
         if (file == nullptr)
         {
             return -1;
@@ -389,17 +361,14 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
     }
     case 14: /*play_audio*/
     {
-        Debug::printf("Inside play_audio sys call.\n");
+        // Debug::printf("Inside play_audio sys call.\n");
         int fd = (int)userEsp[1];
         auto file = gheith::current()->process->getFile(fd);
-        if (file == nullptr)
+        if (file == nullptr || file->isU8250())
         {
             return -1;
         }
-        else if (file->isU8250())
-        {
-            return -1;
-        } //else if it is a valid audio file
+
         WAVHeader *wavhdr = new WAVHeader;
         current()->process->findWavHDR(file, wavhdr);
 
@@ -412,27 +381,31 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         // int num_buffers = wavhdr->data_size / 131070;
         uint32_t data_size = wavhdr->data_size;
         uint32_t buffer_size = 131070;
+        uint32_t totalSamples = wavhdr->sample_rate * (wavhdr->bitsPerSample / 8);
+        totalSamples /= 2;
         while (data_size > 0)
         {
             uint32_t duration;
             uint32_t jiffies;
             if (data_size < (32 * buffer_size))
             {
-                current()->process->fillBuffers(file, wavhdr->sample_rate, true, data_size);
+                current()->process->fillBuffers(file, wavhdr->sample_rate, true, data_size, totalSamples);
                 duration = data_size / wavhdr->sample_rate_eq;
                 jiffies = (((data_size )) % wavhdr->sample_rate_eq);
                 jiffies *= 1000;
                 jiffies /= wavhdr->sample_rate_eq;
                 data_size = 0;
+                totalSamples = 0;
             }
             else
             {
-                current()->process->fillBuffers(file, wavhdr->sample_rate, false, data_size);
+                current()->process->fillBuffers(file, wavhdr->sample_rate, false, data_size, totalSamples);
                 duration = (32 * buffer_size) / wavhdr->sample_rate_eq;
                 jiffies = ((32 * buffer_size) % wavhdr->sample_rate_eq);
                 jiffies *= 1000;
                 jiffies /= wavhdr->sample_rate_eq;
                 data_size -= (32 * 131070);
+                totalSamples -= (0xFFFF * 32);
             }
             //set the play bit to 1
             if (duration == (uint32_t)-1)
