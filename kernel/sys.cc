@@ -108,7 +108,6 @@ int SYS::exec(const char *path,
     sp -= 4;
     *((uint32_t *)sp) = 0; // nullptr to indicate end of the argv array
 
-
     for (int i = argc - 1; i >= 0; i--)
     {
         sp -= 4;
@@ -378,7 +377,14 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             return -1;
         }
 
-        // int num_buffers = wavhdr->data_size / 131070;
+        Debug::printf("Sample Rate = %d\n", wavhdr->sample_rate);
+        Debug::printf("Data_size = %d\n", wavhdr->data_size);
+        Debug::printf("num channels = %d\n", wavhdr->num_channels);
+
+
+        int num_buffers = wavhdr->data_size / 131070;
+        Debug::printf("buffers neing read = %d\n", num_buffers);
+
         uint32_t data_size = wavhdr->data_size;
         uint32_t buffer_size = 131070;
         uint32_t totalSamples = wavhdr->sample_rate * (wavhdr->bitsPerSample / 8);
@@ -391,7 +397,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             {
                 current()->process->fillBuffers(file, wavhdr->sample_rate, true, data_size, totalSamples);
                 duration = data_size / wavhdr->sample_rate_eq;
-                jiffies = (((data_size )) % wavhdr->sample_rate_eq);
+                jiffies = (((data_size)) % wavhdr->sample_rate_eq);
                 jiffies *= 1000;
                 jiffies /= wavhdr->sample_rate_eq;
                 data_size = 0;
@@ -413,11 +419,10 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
                 return -1;
             }
             Debug::printf("duration = %d\n", duration);
-            // outl(AC97::BAR0 + 0x02, 0x4000); // Master volume to max
-            // outl(AC97::BAR0 + 0x04, 0x4000); // Master volume to max
-            // outl(AC97::BAR0 + 0x18, 0x4000); // Master volume to max
+            outl(AC97::BAR0 + 0x02, 0x0000); // Master volume to max
+            outl(AC97::BAR0 + 0x04, 0x0000); // Master volume to max
+            outl(AC97::BAR0 + 0x18, 0x0000); // Master volume to max
             AC97::play(duration, jiffies);
-            
         }
 
         return 1;
