@@ -112,17 +112,18 @@ void Process::findWavHDR(Shared<File> file, WAVHeader *wavhdr)
 		file->seek(file->getOffset() + wavhdr->data_size);
 		file->read(((char *)wavhdr) + 36, 4);
 	}
+	// Debug::printf("should be data %s\n", wavhdr->data);
 	file->read(((char *)wavhdr) + 40, 4);
 }
 
 void Process::fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uint32_t data_size, uint32_t totalSamples)
 {
-	Debug::printf("Filling buffers...\n");
+	// Debug::printf("Filling buffers...\n");
 
 	uint32_t num_buffers = last ? data_size / BUFFER_SIZE : 32;
 
 	outl(AC97::BAR1 + 0x00, (uint32_t)(AC97::audio_buffers));		// Set the base address for Buffer Descriptor List
-	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers + (last ? 1 : 0)); // set number of descriptor entries
+	outb(AC97::BAR1 + 0x05, (uint8_t)num_buffers + (last ? 0 : -1)); // set number of descriptor entries
 
 	for (uint32_t i = 0; i < num_buffers; i++)
 	{
@@ -130,14 +131,13 @@ void Process::fillBuffers(Shared<File> file, uint32_t sampleRate, bool last, uin
 		file->read((char *)AC97::audio_buffers[i].pointer, BUFFER_SIZE);
 		data_size -= BUFFER_SIZE;
 		totalSamples -= 0xFFFF;
-		//  printContents((uint32_t *) AC97::audio_buffers[i].pointer);
 	}
 	if (last)
 	{
 		AC97::audio_buffers[num_buffers].length = (totalSamples - 1);
 		file->read((char *)AC97::audio_buffers[num_buffers].pointer, data_size);
 	}
-	Debug::printf("...Buffers filled!!\n");
+	// Debug::printf("...Buffers filled!!\n");
 
 	ac97_set_sample_rate(sampleRate);
 	outl(AC97::BAR1 + 0xB, 0x2);

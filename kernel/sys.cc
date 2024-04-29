@@ -377,13 +377,13 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             return -1;
         }
 
-        Debug::printf("Sample Rate = %d\n", wavhdr->sample_rate);
-        Debug::printf("Data_size = %d\n", wavhdr->data_size);
-        Debug::printf("num channels = %d\n", wavhdr->num_channels);
+        // Debug::printf("Sample Rate = %d\n", wavhdr->sample_rate);
+        // Debug::printf("Data_size = %d\n", wavhdr->data_size);
+        // Debug::printf("num channels = %d\n", wavhdr->num_channels);
 
 
-        int num_buffers = wavhdr->data_size / 131070;
-        Debug::printf("buffers neing read = %d\n", num_buffers);
+        // int num_buffers = wavhdr->data_size / 131070;
+        // Debug::printf("buffers neing read = %d\n", num_buffers);
 
         uint32_t data_size = wavhdr->data_size;
         uint32_t buffer_size = 131070;
@@ -391,6 +391,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         totalSamples /= 2;
         while (data_size > 0)
         {
+            
             uint32_t duration;
             uint32_t jiffies;
             if (data_size < (32 * buffer_size))
@@ -418,7 +419,7 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             {
                 return -1;
             }
-            Debug::printf("duration = %d\n", duration);
+            // Debug::printf("duration = %d\n", duration);
             outl(AC97::BAR0 + 0x02, 0x0000); // Master volume to max
             outl(AC97::BAR0 + 0x04, 0x0000); // Master volume to max
             outl(AC97::BAR0 + 0x18, 0x0000); // Master volume to max
