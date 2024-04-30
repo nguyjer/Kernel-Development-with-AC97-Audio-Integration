@@ -389,6 +389,8 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
         uint32_t buffer_size = 131070;
         uint32_t totalSamples = wavhdr->sample_rate * (wavhdr->bitsPerSample / 8);
         totalSamples /= 2;
+        Debug::printf("Started playing audio.\n");
+
         while (data_size > 0)
         {
             
@@ -421,10 +423,10 @@ extern "C" int sysHandler(uint32_t eax, uint32_t *frame)
             }
             // Debug::printf("duration = %d\n", duration);
             outl(AC97::BAR0 + 0x02, 0x0000); // Master volume to max
-            outl(AC97::BAR0 + 0x04, 0x0000); // Master volume to max
-            outl(AC97::BAR0 + 0x18, 0x0000); // Master volume to max
+            // outl(AC97::BAR0 + 0x18, 0x0000); // Master volume to max
             AC97::play(duration, jiffies);
         }
+        Debug::printf("Finished playing audio.\n");
 
         return 1;
     }

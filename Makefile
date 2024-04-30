@@ -177,7 +177,7 @@ BLOCK_SIZE = 4096
 
 ${TEST_DATA} : %.data : Makefile
 	@rm -f $*.data
-	mkfs.ext2 -q -b ${BLOCK_SIZE} -i ${BLOCK_SIZE} -d ${TESTS_DIR}/$*.dir  -I 128 -r 0 -t ext2 $*.data 40m
+	mkfs.ext2 -q -b ${BLOCK_SIZE} -i ${BLOCK_SIZE} -d ${TESTS_DIR}/$*.dir  -I 128 -r 0 -t ext2 $*.data 50m
 
 ${TEST_OUTS} : %.out : Makefile %.raw
 	-egrep '^\*\*\*' $*.raw > $*.out 2> /dev/null || true

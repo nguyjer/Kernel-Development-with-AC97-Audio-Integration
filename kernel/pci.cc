@@ -78,7 +78,7 @@ namespace AC97
 
     void play(uint32_t duration, uint32_t jiffies)
     {
-        outw(BAR1 + 0x06, 0x1C);
+        // outw(BAR1 + 0x06, 0x1C);
         outb(BAR1 + 0x0B, 0x1);
         // Debug::printf("Started playing audio.\n");
         uint32_t target = Pit::jiffies + Pit::secondsToJiffies(duration) + jiffies; 
