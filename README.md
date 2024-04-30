@@ -1,8 +1,3 @@
-# gheith_final_project
-Our final project for our operating systems class. 
-
-https://github.com/VendelinSlezak/BleskOS/blob/master/source/drivers/sound/ac97.c
-
 (1) What did you plan on doing?
 We initially planned on using the AC97 device to play ADPCM audio files.
 
@@ -23,7 +18,7 @@ The work was perfectly split 50/50
 
 (5) How can we get/run your code?
 
-You must be on a machine that has audio turned on (On the lab machines we found out you had to increase the qemu volume of the machine
+You must be on a machine that has QEMU installed and working and audio turned on (On the lab machines we found out you had to increase the qemu volume of the machine
 as soon as qemu is booted up during the program). In the terminal run "./run_qemu t0" and that will play the 
 testcase we have created which is set to the audio file we have in the t0 directory.
 
